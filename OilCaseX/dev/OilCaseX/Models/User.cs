@@ -18,8 +18,7 @@ namespace OilCaseApi.Models
         public LithologicalModel? LithologicalModel { get; set; }
         public List<PurchasedObjectOfArrangement>? PurchasesObjectsOfArrangement { get; set; }
         public List<PurchasedSeismic>? PurchasesSeismic { get; set; }
-        public List<PurchasedBoreholeExploration>? PurchasedBoreholeExplorations { get; set; }
-        public List<PurchasedBoreholeProduction>? PurchasedBoreholeProductions { get; set; }
+        public List<PurchasedBorehole>? PurchasedBoreholes { get; set; }
         public List<User>? Users { get; set; }
         public double Money { get; set; } = 0;
         public double Days { get; set; } = 0;

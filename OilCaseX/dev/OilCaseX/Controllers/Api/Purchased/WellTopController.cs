@@ -26,7 +26,7 @@ namespace OilCaseApi.Controllers.Api.Purchased
         protected DbModels.User? GetUser(string? userName)
             => _context.Users
                 .Include(u => u.Team)
-                .ThenInclude(t => t.PurchasedBoreholeExplorations)!
+                .ThenInclude(t => t.PurchasedBoreholes)!
                 .ThenInclude(pb => pb.WellTops)
                 .FirstOrDefault(u => u.UserName == userName);
 
@@ -45,7 +45,7 @@ namespace OilCaseApi.Controllers.Api.Purchased
             DbModels.Team? team = GetUser(User.Claims.FirstOrDefault()?.Value)?.Team;
             if (team == null) return Unauthorized();
 
-            var teamPurchasedBorehole = team?.PurchasedBoreholeExplorations?.FirstOrDefault(pb => pb.Id == value.PurchasedBoreholeId);
+            var teamPurchasedBorehole = team?.PurchasedBoreholes?.FirstOrDefault(pb => pb.Id == value.PurchasedBoreholeId);
             if (teamPurchasedBorehole != null)
                 return Conflict();
 
@@ -74,12 +74,12 @@ namespace OilCaseApi.Controllers.Api.Purchased
             if (team == null) return Unauthorized();
 
             var wellTop = _context.WellTops
-                .Include(wt => wt.PurchasedBoreholeExploration)
+                .Include(wt => wt.PurchasedBorehole)
                 .FirstOrDefault(wt => wt.Id == id);
             if (wellTop != null)
                 return NotFound();
 
-            if (wellTop.PurchasedBoreholeExploration.GameStep != team.GameStep)
+            if (wellTop.PurchasedBorehole.GameStep != team.GameStep)
                 return Conflict();
 
             _context.WellTops.Remove(new DbModels.WellTop() { Id = id });

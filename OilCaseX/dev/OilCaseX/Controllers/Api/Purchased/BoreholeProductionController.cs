@@ -1,9 +1,7 @@
-﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ApiModels = OilCaseApi.Controllers.ApiModels;
 using DbModels = OilCaseApi.Models;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -47,19 +45,23 @@ namespace OilCaseApi.Controllers.Api.Purchased
             if (value.TrajectoryPoints is { Count: < 2 })
                 return Conflict("Необходимо указать минимум 2 точки траектории");
 
-            var kust = _context.PurchasedObject
+            var firsPoint = value.TrajectoryPoints.First();
+            var kusts = _context.PurchasedObject
                 .Include(po => po.ObjectOfArrangement)
-                .FirstOrDefault(po => po.TeamId == team.Id
-                                      & po.Id == value.PurchasedObjectOfArrangementId
-                                      & po.ObjectOfArrangement.Key == "soKust");
+                .Where(po => po.TeamId == team.Id
+                             & po.CellX == firsPoint.X
+                             & po.CellY == firsPoint.Y
+                             & po.ObjectOfArrangement.Key == "soKust");
 
-            if (kust == null) return Conflict("Необходимо купить кустовую площадку");
+            if (!kusts.Any()) return Conflict("Необходимо купить кустовую площадку");
+            var kust = kusts.First();
 
-            var boreholeStatus = _context.BoreholeStatus.Find(value.BoreholeStatusId);
-            if (boreholeStatus == null) return Conflict("Не существующий статус");
+            var boreholeStatus = _context.BoreholeStatus.Find(1);
 
-            var purchasedBorehole = new DbModels.PurchasedBoreholeProduction()
+            var purchasedBorehole = new DbModels.PurchasedBorehole()
             {
+                Name = $"p_{firsPoint.X}_{firsPoint.Y}",
+                IsProduction = true,
                 PurchasedObjectOfArrangement = kust,
                 Team = team,
                 GameStep = team.GameStep,
@@ -68,7 +70,7 @@ namespace OilCaseApi.Controllers.Api.Purchased
                     CellX = tp.X,
                     CellY = tp.Y,
                     CellZ = tp.Z,
-                }),
+                }).ToList(),
                 BoreholeStatusHistories = new()
                 {
                     new()
@@ -79,30 +81,24 @@ namespace OilCaseApi.Controllers.Api.Purchased
                 }
             };
 
-            try
-            {
-                _context.PurchasedBoreholeProductions.Add(purchasedBorehole);
-                _context.SaveChanges();
-                return Created("", purchasedBorehole.Id);
-            }
-            catch (Exception r)
-            {
-                Console.WriteLine(r);
-                return Conflict(r);
-            }
+            _context.PurchasedBoreholes.Add(purchasedBorehole);
+            _context.SaveChanges();
+            return Created("", purchasedBorehole.Id);
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(List<ApiModels.PurchasedBoreholeProductionGet>), statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<ApiModels.PurchasedBoreholeProductionGet>),
+            statusCode: StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), statusCode: StatusCodes.Status401Unauthorized)]
         public IActionResult Get()
         {
             DbModels.Team? team = GetUser(User.Claims.FirstOrDefault().Value)?.Team;
             if (team == null) return Unauthorized();
 
-            var boreholes = _context.PurchasedBoreholeProductions
+            var boreholes = _context.PurchasedBoreholes
                 .Include(pb => pb.TrajectoryPoints)
                 .Include(pb => pb.BoreholeStatusHistories)
+                .Where(pb => pb.IsProduction == true & pb.TeamId == team.Id)
                 .Select(pb => new ApiModels.PurchasedBoreholeProductionGet()
                 {
                     Id = pb.Id,
@@ -132,44 +128,35 @@ namespace OilCaseApi.Controllers.Api.Purchased
             DbModels.Team? team = GetUser(User.Claims.FirstOrDefault().Value)?.Team;
             if (team == null) return Unauthorized();
 
-            var pb = _context.PurchasedBoreholeProductions.Find(valuePatch.Id);
+            var pb = _context.PurchasedBoreholes.Find(valuePatch.Id);
             if (pb == null) return NotFound();
 
             if (pb.TeamId != team.Id) return NotFound();
 
-            var boreholeStatus = _context.BoreholeStatus.Find(valuePatch.BoreholeStatusId);
-            if (boreholeStatus != null)
-            {
-                var boreholeStatusHistory = _context.BoreholeStatusHistories
-                    .FirstOrDefault(bsh => bsh.GameStep == team.GameStep & bsh.PurchasedBoreholeProductionId == pb.Id,
-                        new DbModels.BoreholeStatusHistory()
-                        {
-                            PurchasedBoreholeProductionId = pb.Id,
-                            GameStep = team.GameStep
-                        });
-                boreholeStatusHistory.BoreholeStatus = boreholeStatus;
+            var boreholeStatus = _context.BoreholeStatus.Find(valuePatch.StatusId);
+            if (boreholeStatus == null)
+                return Conflict("Неверный статус");
 
-                if (boreholeStatusHistory.Id < 1)
+            var oldStatus = _context.BoreholeStatusHistories
+                .FirstOrDefault(bsh => bsh.GameStep == team.GameStep & bsh.PurchasedBoreholeId == valuePatch.Id);
+            if (oldStatus == null)
+            {
+                var newStatus = new DbModels.BoreholeStatusHistory()
                 {
-                    _context.BoreholeStatusHistories.Add(boreholeStatusHistory);
-                }
-                else
-                {
-                    _context.Update(boreholeStatusHistory);
-                }
+                    BoreholeStatusId = boreholeStatus.Id,
+                    GameStep = team.GameStep,
+                    PurchasedBoreholeId = valuePatch.Id,
+                };
+                _context.BoreholeStatusHistories.Add(newStatus);
+            }
+            else
+            {
+                oldStatus.BoreholeStatusId = boreholeStatus.Id;
+                _context.BoreholeStatusHistories.Update(oldStatus);
             }
 
-
-            try
-            {
-                _context.Update(pb);
-                _context.SaveChanges();
-                return Accepted();
-            }
-            catch (Exception e)
-            {
-                return Conflict(e);
-            }
+            _context.SaveChanges();
+            return Ok();
         }
 
         /// <summary>
@@ -188,12 +175,12 @@ namespace OilCaseApi.Controllers.Api.Purchased
             DbModels.Team? team = GetUser(User.Claims.FirstOrDefault().Value)?.Team;
             if (team == null) return Unauthorized();
 
-            var purchasedBorehole = _context.PurchasedBoreholeProductions.Find(id);
+            var purchasedBorehole = _context.PurchasedBoreholes.Find(id);
             if (purchasedBorehole?.TeamId != team.Id) return NotFound();
 
             if (purchasedBorehole.GameStep != team.GameStep) return Conflict("Уже нельзя удалить скважину");
 
-            _context.PurchasedBoreholeProductions.Remove(purchasedBorehole);
+            _context.PurchasedBoreholes.Remove(purchasedBorehole);
             _context.SaveChanges();
             return Accepted();
         }

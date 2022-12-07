@@ -38,7 +38,7 @@ namespace OilCaseApi.Controllers.Api.LithologicalData
             DbModels.Team? team;
             if ((team = GetUser(User.Claims.FirstOrDefault().Value)?.Team) == null) return Unauthorized();
 
-            var purchasedBoreholes = _context.PurchasedBoreholeExplorations
+            var purchasedBoreholes = _context.PurchasedBoreholes
                 .Include(u => u.TrajectoryPoints)
                 .Include(u => u.PurchasedObjectOfArrangement)
                 .Include(u => u.PurchasedLogNames)

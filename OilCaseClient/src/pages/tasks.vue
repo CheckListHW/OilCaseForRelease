@@ -539,6 +539,7 @@ import {Properties, ObjectsOfArrangement} from "src/api/Properties";
 import {Dialogs, Notifications, SpinnerOptions, UserActions} from "../data/ObjectTemplates/Dialogs";
 import {ObjectCreator} from "../data/ObjectTemplates/ObjectCreator";
 import Vue from "vue";
+import oilcaseApi from "src/api/OilcaseApi.js";
 
 const width = 800
 const height = 800
@@ -727,12 +728,13 @@ export default {
     this.drawMap()
 
     OilcaseApi.GetInfo().then(resp => {
+      console.log(resp)
       this.iCurGameStep = resp.teamInfo.gameStep
     })
 
     OilcaseApi.GetMapObjectOfArrangement().then(resp => {
       resp.forEach(cell => {
-        this.drawSubCellMap(cell.key, cell.cellX, cell.cellY, cell.subCellX, cell.subCellY, cell.gameStep)
+        this.drawSubCellMap(cell.id, cell.key, cell.cellX, cell.cellY, cell.subCellX, cell.subCellY, cell.gameStep)
       })
     })
 
@@ -750,21 +752,58 @@ export default {
 
     OilcaseApi.GetBoreholeExploration().then(resp => {
       resp.forEach(item => {
-        let CellX = item.trajectoryPoints[0].cellX
-        let CellY = item.trajectoryPoints[0].cellY
+        let CellX = item.trajectoryPoints[0].x
+        let CellY = item.trajectoryPoints[0].y
+        let drillDeep = item.trajectoryPoints[1].z
+        let name = item.name
+
+        let modelWell = item.boreholeType
+        let gameStep = item.gameStep
+        let toeI, toeK, toeJ
+
+        if (item.trajectoryPoints.length > 2) {
+          toeI = item.trajectoryPoints[2].x
+          toeK = item.trajectoryPoints[2].y
+          toeJ = item.trajectoryPoints[2].z
+        }
+
+        this.addBorehole(item.id, CellX, CellY, name,
+          modelWell, gameStep, drillDeep, toeI, toeJ, toeK)
+      })
+      console.log(this.arrDrillsList)
+
+      // OilcaseApi.GetTypesOfResearch().then(resp => {
+      //   this.typesOfResearches = new Map(resp.map(item => [item.name, item]))
+      //
+      //   OilcaseApi.GetBoreholeResearch().then(resp => {
+      //     resp.forEach(item => {
+      //       let borehole = this.arrDrillsList.find(borehole => borehole.iCell === item.cellX & borehole.jCell === item.cellY)
+      //       this.addResearch(item.logNames.map(item => this.typesOfResearches.get(item)), borehole)
+      //     })
+      //   })
+      // })
+    })
+    OilcaseApi.GetBoreholeProduction().then(resp => {
+      resp.forEach(item => {
+        let CellX = item.trajectoryPoints[0].x
+        let CellY = item.trajectoryPoints[0].y
+        let drillDeep = item.trajectoryPoints[1].z
         let name = item.name
         let modelWell = item.boreholeType
         let gameStep = item.gameStep
         let toeI, toeK, toeJ
 
         if (item.trajectoryPoints.length > 2) {
-          toeI = item.trajectoryPoints[3].cellX
-          toeK = item.trajectoryPoints[3].cellY
-          toeJ = item.trajectoryPoints[3].cellZ
+          toeI = item.trajectoryPoints[2].x
+          toeK = item.trajectoryPoints[2].y
+          toeJ = item.trajectoryPoints[2].z
         }
+        let status = item.statusId
 
-        this.addBorehole(CellX, CellY, name,
-          modelWell, gameStep, toeI, toeJ, toeK)
+        this.addBorehole(item.id, CellX, CellY,
+          name, modelWell, gameStep,
+          drillDeep,
+          toeI, toeJ, toeK, item.statusId)
       })
 
       // OilcaseApi.GetTypesOfResearch().then(resp => {
@@ -1024,13 +1063,12 @@ export default {
       return Properties.SeismicCost[typeSeismic]
     },
 
-    drawSubCellMap(key, cellX, cellY, subCellX, subCellY, gameStep) {
+    drawSubCellMap(objectId, key, cellX, cellY, subCellX, subCellY, gameStep) {
       let vm = this
       let data = key
 
       let cXSize = Properties.CellXSize, cYSize = Properties.CellYSize
 
-      let objectId = vm.getMaxIdx(vm.arrSurfObjList)
       let objectOfArrangement = ObjectsOfArrangement.Objects.find(x => x.sKey === data)
 
       let surfNewObj = ObjectCreator.ObjectOfArrangement(objectId, gameStep, data,
@@ -1283,10 +1321,7 @@ export default {
         this.$q
           .dialog(Dialogs.AgreeDeleteSeismic(item.name))
           .then(() => {
-            let _ = item.iCell === 0
-              ? OilcaseApi.DeleteSeismic(1, item.jCell, Properties.MapXSize, item.jCell)
-              : OilcaseApi.DeleteSeismic(item.iCell, 1, item.iCell, Properties.MapYSize)
-
+            OilcaseApi.DeleteSeismic(item.idx)
             var remIndex = this.indexWhere(this.arr2DProfileList, arritem => arritem.name === item.name)
             this.arr2DProfileList.splice(remIndex, 1)
             this.addUserActionToLogAsync(UserActions.DeleteSeismic(item.name))
@@ -1300,7 +1335,7 @@ export default {
         this.$q
           .dialog(Dialogs.AgreeDeleteObjectOfArrangement(item.name))
           .then(() => {
-            OilcaseApi.DeleteMapObjectOfArrangement(item.iCell, item.jCell, item.subCellX, item.subCellY).then(
+            OilcaseApi.DeleteMapObjectOfArrangement(item.idx).then(
               response => {
                 if (response === true) {
                   var remIndex = this.indexWhere(this.arrSurfObjList, arritem => arritem.id === item.id)
@@ -1375,13 +1410,16 @@ export default {
             this.$q.notify(Notifications.SpecifyObjectObjectOfArrangement())
             return
           }
-          this.drawSubCellMap(data, this.pCurPoint.icell, this.pCurPoint.jcell, this.subCellX, this.subCellY, this.iCurGameStep)
 
-          this.mapObjects.setCell(this.pCurPoint.icell, this.pCurPoint.jcell)
-            .setSubCell(this.subCellX, this.subCellY, data, this.iCurGameStep)
 
           OilcaseApi.PostMapObjectOfArrangement(data, this.pCurPoint.icell, this.pCurPoint.jcell,
-            this.subCellX, this.subCellY)
+            this.subCellX, this.subCellY).then(resp => {
+            this.drawSubCellMap(resp, data, this.pCurPoint.icell, this.pCurPoint.jcell,
+              this.subCellX, this.subCellY, this.iCurGameStep)
+
+            this.mapObjects.setCell(this.pCurPoint.icell, this.pCurPoint.jcell)
+              .setSubCell(this.subCellX, this.subCellY, data, this.iCurGameStep)
+          })
 
           this.addUserActionToLogAsync(UserActions.AddObjectsOfArrangement(data,
             this.pCurPoint.icell, this.pCurPoint.jcell, this.subCellX, this.subCellY))
@@ -1525,19 +1563,33 @@ export default {
           case Properties.EditMode.Borehole:
             let trajectoryPoints = [ObjectCreator.TrajectoryPoint(CellX, CellY, this.minDrillDeep),
               ObjectCreator.TrajectoryPoint(CellX, CellY, this.drillDeep)]
-            OilcaseApi.PutBorehole(Properties.BoreholeStatus.Work,
-              Properties.BoreholeType.Exploration, this.pCurPoint.name, trajectoryPoints)
+            switch (this.modelWell) {
+              case Properties.BoreholeType.Exploration:
+                OilcaseApi.PostBoreholeExploration(trajectoryPoints).then(resp => {
+                  this.addBorehole(resp, this.pCurPoint.icell, this.pCurPoint.jcell,
+                    this.pCurPoint.name, this.modelWell, this.iCurGameStep,
+                    this.drillDeep,
+                    this.toeI, this.toeJ, this.toeK)
+                  this.addUserActionToLogAsync(UserActions.AddBorehole(resp, CellX, CellY))
+                })
+                break;
+              case Properties.BoreholeType.Production:
+                trajectoryPoints.push([this.toeI, this.toeJ, this.toeK])
+                OilcaseApi.PostBoreholeProduction(trajectoryPoints).then(resp => {
+                  this.addBorehole(resp, this.pCurPoint.icell, this.pCurPoint.jcell,
+                    this.pCurPoint.name, this.modelWell, this.iCurGameStep,
+                    this.drillDeep, this.toeI, this.toeJ, this.toeK)
+                  this.addUserActionToLogAsync(UserActions.AddBorehole(resp, CellX, CellY))
+                })
+            }
 
-            this.addBorehole(this.pCurPoint.icell, this.pCurPoint.jcell, this.pCurPoint.name,
-              this.modelWell, this.iCurGameStep, this.toeI, this.toeJ, this.toeK)
-
-            this.addUserActionToLogAsync(UserActions.AddBorehole(this.pCurPoint.name, CellX, CellY))
             break;
           case Properties.EditMode.Researches:
-            OilcaseApi.PutBoreholeResearch(Array.from(this.selectedResearches, x => x.name), CellX, CellY)
-
+            let borehole = this.arrDrillsList.filter(item => {
+              return item.jCell === CellX & item.jCell === CellY
+            })[0]
+            OilcaseApi.PatchBoreholeExploration(borehole.idx, Array.from(this.selectedResearches, x => x.name))
             this.addResearch(this.selectedResearches, this.drCurSelWell)
-
             this.addUserActionToLogAsync(UserActions.AddResearches(this.selectedResearches, CellX, CellY))
         }
         this.apiloadvisible = false
@@ -1549,15 +1601,13 @@ export default {
         })
     },
 
-    addBorehole(CellX, CellY, name, modelWell, gameStep, toeI, toeJ, toeK) {
-      let boreholeId = this.getMaxIdx(this.arrDrillsList)
+    addBorehole(boreholeId, CellX, CellY, name, modelWell, drillDeep, gameStep, toeI, toeJ, toeK, boreholeStatus) {
       this.arrDrillsList.push(ObjectCreator.Borehole(
-        boreholeId,
-        this.getXForDraw(CellX), this.getYForDraw(CellY),
+        boreholeId, this.getXForDraw(CellX), this.getYForDraw(CellY),
         CellX, CellY,
         name, gameStep,
-        this.drillDeep, modelWell, toeI, toeJ, toeK
-      ))
+        this.drillDeep, modelWell,
+        toeI, toeJ, toeK, boreholeStatus))
     },
 
     addResearch(arrayOfResearch, borehole) {

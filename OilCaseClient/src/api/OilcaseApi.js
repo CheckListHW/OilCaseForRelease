@@ -5,6 +5,7 @@ import store from 'src/store'
 import Vuex from 'vuex'
 import {UserData} from './DataForm'
 import {MapObjectOfArrangement} from "./MapObjectOfArrangement";
+import points from "echarts/src/layout/points";
 
 Vue.use(Vuex)
 Vue.use(VueCookie)
@@ -88,7 +89,7 @@ export default {
   },
 
 
-  GetInfo: async function (){
+  GetInfo: async function () {
     console.log("[Log] GetInfo")
     return this.execute('get', `/Info/`)
       .then(resp => {
@@ -102,7 +103,7 @@ export default {
       });
   },
 
-  GetLithologicalModelInfo: async function (){
+  GetLithologicalModelInfo: async function () {
     return this.execute('get', `/LithologicalModel/`)
       .then(resp => {
         return resp;
@@ -115,7 +116,7 @@ export default {
 
   PostMapObjectOfArrangement: async function (objectName, cellX, cellY, subCellX, subCellY) {
     console.log('[Log] PutMapObjectOfArrangement')
-    this.execute('post', `/LithologicalData/ObjectOfArrangement/`, {
+    this.execute('post', `/Purchased/ObjectOfArrangement/`, {
       "CellX": cellX,
       "CellY": cellY,
       "SubCellX": subCellX,
@@ -123,24 +124,16 @@ export default {
       "key": objectName
     })
       .then(resp => {
-        return 'success';
+        return resp
       })
       .catch(err => {
         return 'failed' + err;
       });
   },
 
-  DeleteMapObjectOfArrangement: async function (cellX, cellY, subCellX, subCellY) {
+  DeleteMapObjectOfArrangement: async function (boreholeId) {
     console.log('[Log] DeleteMapObjectOfArrangement')
-    return  this.execute('delete', `/LithologicalData/ObjectOfArrangement/`, {
-      "CellX": cellX,
-      "CellY": cellY,
-      "SubCellX": subCellX,
-      "SubCellY": subCellY,
-      "ObjectOfArrangement": {
-        "key": "None"
-      }
-    })
+    return this.execute('delete', `/Purchased/ObjectOfArrangement/${boreholeId}`, )
       .then(resp => {
         return true;
       })
@@ -150,7 +143,7 @@ export default {
   },
 
   GetMapObjectOfArrangement: async function () {
-    return this.execute('get', `/LithologicalData/ObjectOfArrangement/`)
+    return this.execute('get', `/Purchased/ObjectOfArrangement/`)
       .then(resp => {
         console.log(resp)
         return resp
@@ -163,7 +156,7 @@ export default {
 
   PostSeismic: async function (startCellX, startCellY, endCellX, endCellY) {
     console.log('[Log] PutSeismic')
-    return  this.execute('post', `/Purchased/Seismic/`, {
+    return this.execute('post', `/Purchased/Seismic/`, {
       "StartCellX": startCellX,
       "StartCellY": startCellY,
       "EndCellX": endCellX,
@@ -178,14 +171,9 @@ export default {
       });
   },
 
-  DeleteSeismic: async function (startCellX, startCellY, endCellX, endCellY) {
+  DeleteSeismic: async function (seismicId) {
     console.log('[Log] DeleteSeismic')
-    return  this.execute('delete', `/Purchased/Seismic/`, {
-      "StartCellX": startCellX,
-      "StartCellY": startCellY,
-      "EndCellX": endCellX,
-      "EndCellY": endCellY,
-    })
+    return this.execute('delete', `/Purchased/Seismic/${seismicId}`)
       .then(resp => {
         return true;
       })
@@ -197,7 +185,7 @@ export default {
 
   GetSeismic: async function () {
     console.log('[Log] GetSeismic')
-    return  this.execute('get', `/Purchased/Seismic/`)
+    return this.execute('get', `/Purchased/Seismic/`)
       .then(resp => {
         return resp;
       })
@@ -206,14 +194,44 @@ export default {
       });
   },
 
+  GetBoreholeProduction: async function () {
+    console.log('[Log] GetBorehole')
+    return this.execute('get', `/Purchased/BoreholeProduction/`)
+      .then(resp => {
+        return resp;
+      })
+      .catch(err => {
+        return false;
+      });
+  },
 
-  PutBoreholeProduction: async function (boreholeStatus, boreholeType, name, trajectoryPoints) {
+  PostBoreholeProduction: async function (trajectoryPoints) {
+    console.log('[Log] PostBoreholeProduction')
+    let points = []
+    trajectoryPoints.forEach(p => {
+      points.push({
+        x: p.CellX,
+        y: p.CellY,
+        z: p.CellZ,
+      })
+    })
+    return this.execute('post', `/Purchased/BoreholeProduction/`, {
+      "TrajectoryPoints": points
+    })
+      .then(resp => {
+        return resp;
+      })
+      .catch(err => {
+        console.log(err)
+        return false;
+      });
+  },
+
+  PatchBoreholeProduction: async function (boreholeId, dtatusId) {
     console.log('[Log] PutBorehole')
-    return  this.execute('put', `/Purchased/BoreholeProduction/`, {
-      "BoreholeStatus": boreholeStatus,
-      "BoreholeType": boreholeType,
-      "Name": name,
-      "trajectoryPoints": trajectoryPoints,
+    return this.execute('patch', `/Purchased/BoreholeProduction/`, {
+      "Id": boreholeId,
+      "StatusId": dtatusId
     })
       .then(resp => {
         console.log(resp)
@@ -227,7 +245,7 @@ export default {
 
   DeleteBoreholeProduction: async function (id) {
     console.log('[Log] DeleteBorehole')
-    return  this.execute('delete', `/Purchased/BoreholeProduction/${id}`)
+    return this.execute('delete', `/Purchased/BoreholeProduction/${id}`)
       .then(resp => {
         console.log(resp)
         return true;
@@ -238,9 +256,10 @@ export default {
       });
   },
 
-  GetBoreholeProduction: async function () {
+
+  GetBoreholeExploration: async function () {
     console.log('[Log] GetBorehole')
-    return  this.execute('get', `/Purchased/BoreholeProduction/`)
+    return this.execute('get', `/Purchased/BoreholeExploration/`)
       .then(resp => {
         return resp;
       })
@@ -249,14 +268,34 @@ export default {
       });
   },
 
+  PostBoreholeExploration: async function (trajectoryPoints) {
+    console.log('[Log] PostBoreholeExploration')
+    let points = []
+    trajectoryPoints.forEach(p => {
+      points.push({
+        x: p.CellX,
+        y: p.CellY,
+        z: p.CellZ,
+      })
+    })
+    console.log(trajectoryPoints)
+    return this.execute('post', `/Purchased/BoreholeExploration/`, {
+      "TrajectoryPoints": points
+    })
+      .then(resp => {
+        return resp;
+      })
+      .catch(err => {
+        console.log(err)
+        return false;
+      });
+  },
 
-  PutBoreholeExploration: async function (boreholeStatus, boreholeType, name, trajectoryPoints) {
-    console.log('[Log] PutBorehole')
-    return  this.execute('put', `/Purchased/BoreholeExploration/`, {
-      "BoreholeStatus": boreholeStatus,
-      "BoreholeType": boreholeType,
-      "Name": name,
-      "trajectoryPoints": trajectoryPoints,
+  PatchBoreholeExploration: async function (boreholeId, logNames) {
+    console.log('[Log] PatchBoreholeExploration')
+    return this.execute('patch', `/Purchased/BoreholeExploration/`, {
+      "logNames": boreholeStatus,
+      "id": boreholeType,
     })
       .then(resp => {
         console.log(resp)
@@ -270,7 +309,7 @@ export default {
 
   DeleteBoreholeExploration: async function (id) {
     console.log('[Log] DeleteBorehole')
-    return  this.execute('delete', `/Purchased/BoreholeExploration/${id}`)
+    return this.execute('delete', `/Purchased/BoreholeExploration/${id}`)
       .then(resp => {
         console.log(resp)
         return true;
@@ -281,21 +320,10 @@ export default {
       });
   },
 
-  GetBoreholeExploration: async function () {
-    console.log('[Log] GetBorehole')
-    return  this.execute('get', `/Purchased/BoreholeExploration/`)
-      .then(resp => {
-        return resp;
-      })
-      .catch(err => {
-        return false;
-      });
-  },
 
-
-  CompleteMove: async function (){
+  CompleteMove: async function () {
     console.log('[Log] Post CompleteMove')
-    return  this.execute('post', `/CompleteMove/`)
+    return this.execute('post', `/CompleteMove/`)
       .then(resp => {
         return resp;
       })
@@ -305,9 +333,9 @@ export default {
   },
 
 
-  GetTypesOfResearch: async function (){
+  GetTypesOfResearch: async function () {
     console.log('[Log] GetTypesOfResearch')
-    return  this.execute('get', `/LogName/`)
+    return this.execute('get', `/LogName/`)
       .then(resp => {
         return resp;
       })
@@ -344,9 +372,9 @@ export default {
   //     });
   // },
 
-  GetBoreholeLog: async function(){
+  GetBoreholeLog: async function () {
     console.log('[Log] GetBoreholeLog')
-    return  this.execute('get', `/LithologicalData/BoreholeLog/`)
+    return this.execute('get', `/LithologicalData/BoreholeLog/`)
       .then(resp => {
         return resp;
       })
@@ -355,9 +383,9 @@ export default {
       });
   },
 
-  GetDataSeismic: async function(){
+  GetDataSeismic: async function () {
     console.log('[Log] Seismic')
-    return  this.execute('get', `/LithologicalData/Seismic/`)
+    return this.execute('get', `/LithologicalData/Seismic/`)
       .then(resp => {
         return resp;
       })
@@ -365,7 +393,6 @@ export default {
         return false;
       });
   },
-
 
 
   // async executeFull(method, resources, data) {

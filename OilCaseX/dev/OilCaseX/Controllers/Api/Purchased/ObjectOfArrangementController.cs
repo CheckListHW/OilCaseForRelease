@@ -2,12 +2,13 @@
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using OilCaseApi.Controllers.ApiModels;
 using DbModel = OilCaseApi.Models;
 using OilCaseApi.resources;
 
 namespace OilCaseApi.Controllers.Api.Purchased
 {
-    [Route("api/v1/LithologicalData/[controller]")]
+    [Route("api/v1/Purchased/[controller]")]
     [ApiController]
     [Authorize(AuthenticationSchemes = "Bearer")]
     [EnableCors]
@@ -112,7 +113,7 @@ namespace OilCaseApi.Controllers.Api.Purchased
                 return Conflict(
                     $"В текущем месте уже есть объект ({currentPurchasedObjects.Id}):  {currentPurchasedObjects?.ObjectOfArrangement?.Key}");
 
-            _context.PurchasedObject.Add(new ()
+            var objectOfArrangement = new DbModel.PurchasedObjectOfArrangement()
             {
                 TeamId = team.Id,
                 GameStep = team.GameStep,
@@ -121,10 +122,11 @@ namespace OilCaseApi.Controllers.Api.Purchased
                 SubCellX = request.SubCellX,
                 SubCellY = request.SubCellY,
                 ObjectOfArrangement = currentObject
-            });
+            };
+            _context.PurchasedObject.Add(objectOfArrangement);
             _context.SaveChanges();
 
-            return Ok();
+            return Ok(objectOfArrangement.Id);
         }
     }
 }

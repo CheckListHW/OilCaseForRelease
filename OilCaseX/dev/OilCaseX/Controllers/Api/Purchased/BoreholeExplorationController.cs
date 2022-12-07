@@ -39,24 +39,29 @@ namespace OilCaseApi.Controllers.Api.Purchased
         [ProducesResponseType(typeof(int), statusCode: StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(string), statusCode: StatusCodes.Status401Unauthorized)]
         [ProducesResponseType(typeof(string), statusCode: StatusCodes.Status409Conflict)]
-        public IActionResult Post([FromBody] ApiModels.PurchasedBoreholeExplorationPost value)
+        public IActionResult Post([FromBody] ApiModels.PurchasedBorehole value)
         {
             DbModels.Team? team = GetUser(User.Claims.FirstOrDefault().Value)?.Team;
             if (team == null) return Unauthorized();
 
-            if (value.TrajectoryPoints is { Count: 2 })
+            if (value.TrajectoryPoints is not { Count: 2 })
                 return Conflict("Необходимо указать 2 точки траектории");
 
-            var kust = _context.PurchasedObject
+            var firsPoint = value.TrajectoryPoints.First();
+            var kusts = _context.PurchasedObject
                 .Include(po => po.ObjectOfArrangement)
-                .FirstOrDefault(po => po.TeamId == team.Id
-                                      & po.Id == value.PurchasedObjectOfArrangementId
-                                      & po.ObjectOfArrangement.Key == "soKust");
+                .Where(po => po.TeamId == team.Id
+                             & po.CellX == firsPoint.X
+                             & po.CellY == firsPoint.Y
+                             & po.ObjectOfArrangement.Key == "soKust");
 
-            if (kust == null) return Conflict("Необходимо купить кустовую площадку");
+            if (!kusts.Any()) return Conflict("Необходимо купить кустовую площадку");
+            var kust = kusts.First();
 
-            var purchasedBorehole = new DbModels.PurchasedBoreholeExploration()
+            var purchasedBorehole = new DbModels.PurchasedBorehole()
             {
+                Name = $"e_{firsPoint.X}_{firsPoint.Y}",
+                IsProduction = false,
                 PurchasedObjectOfArrangement = kust,
                 Team = team,
                 GameStep = team.GameStep,
@@ -65,33 +70,26 @@ namespace OilCaseApi.Controllers.Api.Purchased
                     CellX = tp.X,
                     CellY = tp.Y,
                     CellZ = tp.Z,
-                })
+                }).ToList()
             };
 
-            try
-            {
-                _context.PurchasedBoreholeExplorations.Add(purchasedBorehole);
-                _context.SaveChanges();
-                return Created("", purchasedBorehole.Id);
-            }
-            catch (Exception r)
-            {
-                Console.WriteLine(r);
-                return Conflict(r);
-            }
+            _context.PurchasedBoreholes.Add(purchasedBorehole);
+            _context.SaveChanges();
+            return Created("", purchasedBorehole.Id);
         }
 
         [HttpGet]
-        [ProducesResponseType(typeof(List<ApiModels.PurchasedBoreholeExplorationGet>), statusCode: StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(List<ApiModels.PurchasedBoreholeGet>), statusCode: StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(string), statusCode: StatusCodes.Status401Unauthorized)]
         public IActionResult Get()
         {
             DbModels.Team? team = GetUser(User.Claims.FirstOrDefault().Value)?.Team;
             if (team == null) return Unauthorized();
 
-            var boreholes = _context.PurchasedBoreholeExplorations
+            var boreholes = _context.PurchasedBoreholes
                 .Include(pb => pb.TrajectoryPoints)
-                .Select(pb => new ApiModels.PurchasedBoreholeExplorationGet()
+                .Where(pb => pb.TeamId == team.Id & pb.IsProduction == false)
+                .Select(pb => new ApiModels.PurchasedBoreholeGet()
                 {
                     Id = pb.Id,
                     Name = pb.Name,
@@ -119,34 +117,33 @@ namespace OilCaseApi.Controllers.Api.Purchased
             DbModels.Team? team = GetUser(User.Claims.FirstOrDefault().Value)?.Team;
             if (team == null) return Unauthorized();
 
-            var pb = _context.PurchasedBoreholeExplorations.Find(valuePatch.Id);
+            var pb = _context.PurchasedBoreholes.Find(valuePatch.Id);
             if (pb == null) return NotFound();
 
             if (pb.GameStep != team.GameStep) return Conflict("Скважина не доступна к изменению. Ход уже завершен");
 
-            var allLogNames = _context.LogNames.Where(ln => ln.LithologicalModelId == team.LithologicalModelId);
+            var allLogNames = _context.LogNames
+                .Where(ln => ln.LithologicalModelId == team.LithologicalModelId);
+
+            _context.PurchasedLogName.RemoveRange(_context.PurchasedLogName.Where(pln => pln.PurchasedBoreholeId == pb.Id));
+            _context.SaveChanges();
+
             pb.PurchasedLogNames = new List<DbModels.PurchasedLogName>();
 
             foreach (var name in valuePatch.LogNames)
             {
                 DbModels.LogName? logName;
-                if ((logName = allLogNames.FirstOrDefault(ln => ln.Name == name)) != null )
-                    pb.PurchasedLogNames.Add(new(){
+                if ((logName = allLogNames.FirstOrDefault(ln => ln.Name == name)) != null)
+                    pb.PurchasedLogNames.Add(new()
+                    {
                         LogName = logName,
-                        PurchasedBoreholeExploration = pb,
+                        PurchasedBorehole = pb,
                     });
             }
 
-            try
-            {
-                _context.Update(pb);
-                _context.SaveChanges();
-                return Accepted();
-            }
-            catch (Exception e)
-            {
-                return Conflict(e);
-            }
+            _context.Update(pb);
+            _context.SaveChanges();
+            return Accepted();
         }
 
         /// <summary>
@@ -165,12 +162,12 @@ namespace OilCaseApi.Controllers.Api.Purchased
             DbModels.Team? team = GetUser(User.Claims.FirstOrDefault().Value)?.Team;
             if (team == null) return Unauthorized();
 
-            var purchasedBorehole = _context.PurchasedBoreholeExplorations.Find(id);
+            var purchasedBorehole = _context.PurchasedBoreholes.Find(id);
             if (purchasedBorehole?.TeamId != team.Id) return NotFound();
 
             if (purchasedBorehole.GameStep != team.GameStep) return Conflict("Уже нельзя удалить скважину");
 
-            _context.PurchasedBoreholeExplorations.Remove(purchasedBorehole);
+            _context.PurchasedBoreholes.Remove(purchasedBorehole);
             _context.SaveChanges();
             return Accepted();
         }

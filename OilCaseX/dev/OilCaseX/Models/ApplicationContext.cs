@@ -23,8 +23,7 @@ public class ApplicationContext : IdentityDbContext<User, IdentityRole, string>
     public virtual DbSet<BoreholeStatusHistory> BoreholeStatusHistories { get; set; }
     public virtual DbSet<ObjectOfArrangement> ObjectsOfArrangement { get; set; }
     
-    public virtual DbSet<PurchasedBoreholeExploration> PurchasedBoreholeExplorations { get; set; }
-    public virtual DbSet<PurchasedBoreholeProduction> PurchasedBoreholeProductions{ get; set; }
+    public virtual DbSet<PurchasedBorehole> PurchasedBoreholes { get; set; }
     public virtual DbSet<PurchasedObjectOfArrangement> PurchasedObject { get; set; }
     public virtual DbSet<PurchasedSeismic> PurchasedSeismic { get; set; }
     public virtual DbSet<PurchasedLogName> PurchasedLogName { get; set; }
@@ -65,13 +64,13 @@ public class ApplicationContext : IdentityDbContext<User, IdentityRole, string>
             .HasForeignKey("LogNameId")
             .OnDelete(DeleteBehavior.NoAction);
         
-        builder.Entity<PurchasedBoreholeExploration>()
+        builder.Entity<PurchasedBorehole>()
             .HasOne(typeof(Team), "Team")
             .WithMany()
             .HasForeignKey("TeamId")
             .OnDelete(DeleteBehavior.NoAction);
 
-        builder.Entity<PurchasedBoreholeProduction>()
+        builder.Entity<PurchasedBorehole>()
             .HasOne(typeof(Team), "Team")
             .WithMany()
             .HasForeignKey("TeamId")

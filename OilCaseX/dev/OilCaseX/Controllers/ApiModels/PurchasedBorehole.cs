@@ -2,19 +2,17 @@
 
 public class PurchasedBorehole
 {
-    public string Name { get; set; }
-    public int PurchasedObjectOfArrangementId { get; set; }
+    public string? Name { get; set; }
     public List<TrajectoryPoint> TrajectoryPoints { get; set; } = new();
 }
 
 public class PurchasedBoreholeProductionPost : PurchasedBorehole
 {
-    public int BoreholeStatusId { get; set; }
+    public int StatusId { get; set; }
 }
 
 public class PurchasedBoreholeExplorationPost : PurchasedBorehole
 {
-    public List<string>? LogNames { get; set; }
 }
 
 public class PurchasedBoreholeExplorationPatch
@@ -26,7 +24,7 @@ public class PurchasedBoreholeExplorationPatch
 public class PurchasedBoreholeProductionPatch
 {
     public int Id { get; set; }
-    public int? BoreholeStatusId { get; set; }
+    public int StatusId { get; set; }
 }
 
 public class PurchasedBoreholeGet : PurchasedBorehole

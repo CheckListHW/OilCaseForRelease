@@ -21,8 +21,8 @@ public class BoreholeStatusHistory
 {
     [Key] public int Id { get; set; }
     public int GameStep { get; set; }
-    public int PurchasedBoreholeProductionId { get; set; }
-    public PurchasedBoreholeProduction PurchasedBoreholeProduction { get; set; }
+    public int PurchasedBoreholeId { get; set; }
+    public PurchasedBorehole PurchasedBorehole { get; set; }
     public int BoreholeStatusId { get; set; }
     public BoreholeStatus BoreholeStatus { get; set; }
 
@@ -63,18 +63,13 @@ public class PurchasedBorehole : IPurchased
     public PurchasedObjectOfArrangement PurchasedObjectOfArrangement { get; set; }
     public string Name { get; set; }
     public IEnumerable<TrajectoryPoint> TrajectoryPoints { get; set; }
-}
-
-
-public class PurchasedBoreholeProduction : PurchasedBorehole
-{
     public List<BoreholeStatusHistory> BoreholeStatusHistories { get; set; }
-}
 
-public class PurchasedBoreholeExploration : PurchasedBorehole
-{
     public IEnumerable<WellTop> WellTops { get; set; }
     public List<PurchasedLogName> PurchasedLogNames { get; set; }
+
+    // if False is Exploration
+    public bool IsProduction { get; set; }
 }
 
 
@@ -82,7 +77,7 @@ public class WellTop
 {
     [Key] public int Id { get; set; }
     public int PurchasedBoreholeId { get; set; }
-    public PurchasedBoreholeExploration PurchasedBoreholeExploration { get; set; }
+    public PurchasedBorehole PurchasedBorehole { get; set; }
     public double Z { get; set; }
     public string? Name { get; set; }
 }
@@ -130,19 +125,6 @@ public class PurchasedObjectOfArrangement : IPurchased
         => (a?.CellX == b?.CellX) & (a?.CellY == b?.CellY)
                                   & (a?.SubCellX == b?.SubCellX) & (a?.SubCellY == b?.SubCellY)
                                   & (a?.TeamId == b?.TeamId || a?.Team?.Id == b?.Team?.Id);
-    //{
-    //    Debug.WriteLine("asd");
-    //    Debug.WriteLine(a?.CellX == b?.CellX);
-    //    Debug.WriteLine(a?.CellY == b?.CellY);
-    //    Debug.WriteLine(a?.SubCellY == b?.SubCellY);
-    //    Debug.WriteLine(a?.SubCellX == b?.SubCellX);
-    //    Debug.WriteLine(a?.TeamId); Debug.WriteLine(b?.TeamId);
-    //    Debug.WriteLine("asd");
-
-    //    return (a?.CellX == b?.CellX) & (a?.CellY == b?.CellY)
-    //    & (a?.SubCellX == b?.SubCellX) & (a?.SubCellY == b?.SubCellY)
-    //    & (a?.TeamId == b?.TeamId || a?.Team?.Id == b?.Team?.Id);
-    //}
     public static bool operator !=(PurchasedObjectOfArrangement? a, PurchasedObjectOfArrangement? b)
         => !(a == b);
 }
@@ -151,7 +133,7 @@ public class PurchasedLogName
 {
     [Key] public int Id { get; set; }
     public int PurchasedBoreholeId { get; set; }
-    public PurchasedBoreholeExploration PurchasedBoreholeExploration { get; set; }
+    public PurchasedBorehole PurchasedBorehole { get; set; }
     public int LogNameId { get; set; }
     public LogName LogName { get; set; }
 }

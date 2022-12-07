@@ -158,11 +158,11 @@ export class ObjectCreator {
     return newObjectOfArrangement
   }
 
-  static Borehole(id,
-                  drawCellX, drawCellY,
+  static Borehole(id, drawCellX, drawCellY,
                   cellX, cellY,
                   name, gameStep,
-                  drillDepth, modelWell, toeI, toeJ, toeK) {
+                  drillDepth, modelWell,
+                  toeI, toeJ, toeK, status) {
     return {
       idx: id,
       x: drawCellX,
@@ -170,6 +170,7 @@ export class ObjectCreator {
       iCell: cellX,
       jCell: cellY,
       onGameStep: gameStep,
+      status: status,
       id: name,
       fill: '#f7450e',
       drilldeep: drillDepth,
