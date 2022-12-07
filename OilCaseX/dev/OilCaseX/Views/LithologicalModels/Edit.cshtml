@@ -1,0 +1,56 @@
+﻿@model OilCaseApi.Models.LithologicalModel
+
+@{
+    ViewData["Title"] = "Литологические модели";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Create</h1>
+
+<h4>LithologicalModel</h4>
+<hr/>
+<div class="row">
+    <div >
+        <form asp-action="Edit" enctype="multipart/form-data">
+            <input type="hidden" name="Id" value="@Model.Id"/>
+            <div class="form-group">
+                <label class="control-label">Name</label>
+                <input name="Name" type="text" class="form-control" value="@Model.Name"/>
+
+                <label class="control-label" style="margin-top: 10px">Файл *.csv c <b>гисами</b></label>
+                <input name="UploadFileBoreholeLogs" type="file" class="form-control" accept=".csv"/>
+                <label class="control-label" style="color: crimson"> (Загрузка занимает от 1 до 10 минут.)</label>
+                <br/>
+                <label class="control-label" style="margin-top: 10px">Файл *.csv c <b>сейсмикой</b></label>
+                <input name="UploadFileSeismic" type="file" class="form-control" accept=".csv"/>
+                <label class="control-label" style="color: crimson"> (Загрузка занимает от 1 до 3 минут.)</label>
+                <br/>
+                <input type="submit" value="Save" class="btn btn-primary" style="margin-top: 20px; margin-bottom: 20px"/>
+            </div>
+        </form>
+        <hr/>
+        <div class="row">
+            <div class="col-md-2">
+                <form asp-action="DeleteGisAndSeismic" style="margin-top: 10px">
+                    <input type="hidden" name="Id" value="@Model.Id"/>
+                    <input type="submit" value="Delete gis and seismic" class="btn btn-danger"/>
+                </form>
+            </div>
+            <div class="col-md-2">
+                <form asp-action="DeleteDuplicateGis" style="margin-top: 10px">
+                    <input type="hidden" name="Id" value="@Model.Id"/>
+                    <input type="submit" value="Delete duplicate gis" class="btn btn-danger"/>
+                </form>
+            </div>
+        </div>
+        <hr/>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

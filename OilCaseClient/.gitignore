@@ -1,0 +1,8 @@
+/.quasar/
+/node_modules/
+*.zip
+/.idea/.gitignore
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/OilCaseClient.iml
+/.idea/vcs.xml

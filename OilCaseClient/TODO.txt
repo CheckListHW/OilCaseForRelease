@@ -1,0 +1,31 @@
+﻿
+https://x.oilcase.ru/geocase22/#/showDictUsers 
+
+admin
+dF57@wer
+
+x.338@oilcase.ru
+60a9969
+
+
+OilCase X. ТЗ на доработку. DataFlow 
+https://docs.google.com/spreadsheets/d/13P43ECefQW-BNc3rwqXgPZJ-EmYGYKQaCaa73jAD2jQ/edit#gid=1485736816 
+
+
+
+//получить фото керна
+sLinktoMetod+'GetOneWellDataZip/'+item.name+'/'+item.iCell+'/'+item.jCell+'/'+(item.drilldeep)
+
+//данные сейсмики
+sLinktoMetod+'GetOne2dProfDataZip/'+item.name+'/'+item.profType+'/'+item.iCell+'/'+item.jCell+'/'+item.seismType">
+
+sLinktoMetod+'GetOne3dProfDataZip/'+item.name+'/'+item.iCelll+'/'+item.iCellr+'/'+item.jCellb+'/'+item.jCellt+'/'+item.seismType
+
+
+
+
+1 - общее значение уровня Z 
+
+2 - массив в который заносятся все действия с отметкой времени
+
+3 - маркер привязки (вектор направления) на карте и сцене

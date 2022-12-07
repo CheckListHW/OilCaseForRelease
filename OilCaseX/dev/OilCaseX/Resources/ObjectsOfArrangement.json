@@ -1,0 +1,219 @@
+{
+  "ObjectsOfArrangement": [
+    {
+      "Key": "soTube",
+      "CostDay": 30,
+      "CostMoney": 100,
+      "Description": "Трубопровод",
+      "Alias": "t",
+      "Color": "#7cc783",
+      "Part": 2
+    },
+    {
+      "Key": "soElLine",
+      "CostDay": 30,
+      "CostMoney": 100,
+      "Description": "Линия Электропередач",
+      "Alias": "le",
+      "Color": "#86bcde",
+      "Part": 2
+    },
+    {
+      "Key": "soRoad",
+      "CostDay": 30,
+      "CostMoney": 100,
+      "Description": "Дорожное полотно",
+      "Alias": "r",
+      "Color": "#545452",
+      "Part": 2
+    },
+    {
+      "Key": "soKust",
+      "CostDay": 30,
+      "CostMoney": 100,
+      "Description": "Кустовая площадка",
+      "Alias": "kp",
+      "Color": "#e8d08d",
+      "Part": 3
+    },
+    {
+      "Key": "soGTES",
+      "CostDay": 30,
+      "CostMoney": 1500,
+      "Description": "ГТЭС (Газотурбинная Электростанция)",
+      "Alias": "gtes",
+      "ModelGLTfName": "GTES.gltf",
+      "Part": 4
+    },
+    {
+      "Key": "soAGZU",
+      "CostDay": 30,
+      "CostMoney": 1000,
+      "Description": "АГЗУ (Автоматизированная Замерная Установка)",
+      "Alias": "agzu",
+      "ModelGLTfName": "AGZU.gltf",
+      "Part": 4
+    },
+    {
+      "Key": "soDNS",
+      "CostDay": 30,
+      "CostMoney": 1400,
+      "Description": "ДНС (Дожимная Насосная Станция)",
+      "Alias": "dns",
+      "ModelGLTfName": "NPS.gltf",
+      "Part": 4
+    },
+    {
+      "Key": "soNKS",
+      "CostDay": 30,
+      "CostMoney": 1400,
+      "Description": "НКС (Насосно-Компрессорная Станция)",
+      "Alias": "nks",
+      "ModelGLTfName": "NS.gltf",
+      "Part": 4
+    },
+    {
+      "Key": "soUPSV",
+      "CostDay": 30,
+      "CostMoney": 2200,
+      "Description": "Мини УПСВ (Установка Предварительного Сброса Воды)",
+      "Alias": "upsv",
+      "ModelGLTfName": "UPSV.gltf",
+      "Part": 4
+    },
+    {
+      "Key": "soSEP2f",
+      "CostDay": 30,
+      "CostMoney": 1800,
+      "Description": "Сепаратор 2х фазный",
+      "Alias": "sep2f",
+      "ModelGLTfName": "SEPAR2ph.gltf",
+      "Part": 4
+    },
+    {
+      "Key": "soSEP3f",
+      "CostDay": 30,
+      "CostMoney": 2200,
+      "Description": "Сепаратор 3х фазный",
+      "Alias": "sep3f",
+      "ModelGLTfName": "SEPAR3ph.gltf",
+      "Part": 4
+    },
+    {
+      "Key": "soUPN",
+      "CostDay": 30,
+      "CostMoney": 3500,
+      "Description": "Мини УПН (Установка Подготовки Нефти)",
+      "Alias": "upn",
+      "ModelGLTfName": "UPN.gltf",
+      "Part": 4
+    },
+    {
+      "Key": "soUKPG",
+      "CostDay": 30,
+      "CostMoney": 3500,
+      "Description": "Мини УКПГ (Установка Комплексной Подготовки Газа)",
+      "Alias": "ukpg",
+      "ModelGLTfName": "UKPG.gltf",
+      "Part": 4
+    },
+    {
+      "Key": "soCPS",
+      "CostDay": 30,
+      "CostMoney": 2000,
+      "Description": "Мини ЦПС (Центральный Пункт Сбора)",
+      "Alias": "cps",
+      "ModelGLTfName": "CPS.gltf",
+      "Part": 4
+    },
+    {
+      "Key": "soNPZ",
+      "CostDay": 30,
+      "CostMoney": 5000,
+      "Description": "Мини НПЗ (Нефтеперерабатывающий Завод)",
+      "Alias": "npz",
+      "ModelGLTfName": "NPZ.gltf",
+      "Part": 4
+    },
+    {
+      "Key": "soGPZ",
+      "CostDay": 30,
+      "CostMoney": 5000,
+      "Description": "Мини ГПЗ (Газоперерабатывающий Завод)",
+      "Alias": "gpz",
+      "ModelGLTfName": "GPZ.gltf",
+      "Part": 4
+    },
+    {
+      "Key": "soUPV",
+      "CostDay": 30,
+      "CostMoney": 2200,
+      "Description": "Мини УПВ (Установка Подготовки Пластовой Воды)",
+      "Alias": "upv",
+      "ModelGLTfName": "UPV.gltf",
+      "Part": 4
+    },
+    {
+      "Key": "soFakel",
+      "CostDay": 30,
+      "CostMoney": 500,
+      "Description": "Факел",
+      "Alias": "fakel",
+      "ModelGLTfName": "FAKEL.gltf",
+      "Part": 5
+    },
+    {
+      "Key": "soTO",
+      "CostDay": 30,
+      "CostMoney": 3000,
+      "Description": "Мини Терминал отгрузки",
+      "Alias": "to",
+      "ModelGLTfName": "Terminal.gltf",
+      "Part": 5
+    },
+    {
+      "Key": "soFPSO",
+      "CostDay": 30,
+      "CostMoney": 4000,
+      "Description": "FPSO (Floating Production Storage and Offloading)",
+      "Alias": "fpso",
+      "ModelGLTfName": "FPSO.gltf",
+      "Part": 5
+    },
+    {
+      "Key": "soTanker",
+      "CostDay": 30,
+      "CostMoney": 3000,
+      "Description": "Мини танкер",
+      "Alias": "tanker",
+      "ModelGLTfName": "Tanker.gltf",
+      "Part": 5
+    },
+    {
+      "Key": "soHelic",
+      "CostDay": 30,
+      "CostMoney": 1200,
+      "Description": "Вертолетная площадка",
+      "Alias": "helic",
+      "Part": 5
+    },
+    {
+      "Key": "soLM",
+      "CostDay": 30,
+      "CostMoney": 1200,
+      "Description": "Жилой блок",
+      "Alias": "lm",
+      "ModelGLTfName": "House.gltf",
+      "Part": 5
+    },
+    {
+      "Key": "soTU",
+      "CostDay": 30,
+      "CostMoney": 1200,
+      "Description": "Транспортный цех",
+      "Alias": "tu",
+      "ModelGLTfName": "TD.gltf",
+      "Part": 5
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "StartMoney": 1000000,
+  "StartDays": 1000,
+  "SizeX": 25,
+  "SizeY": 25,
+  "SizeSubCellX": 3,
+  "SizeSubCellY": 3
+}

@@ -1,0 +1,28 @@
+{
+  "BoreholeStatus": {
+    "Name": "1"
+  },
+  "BoreholeType": {
+    "Name": "1"
+  },
+  "Name": "1",
+  "TrajectoryPoints": [
+    {
+      "CellX": 1,
+      "CellY": 2,
+      "CellZ": 3
+    },
+    {
+      "CellX": 1,
+      "CellY": 2,
+      "CellZ": 3
+    },
+    {
+      "CellX": 1,
+      "CellY": 2,
+      "CellZ": 3
+    }
+  ]
+}
+
+
