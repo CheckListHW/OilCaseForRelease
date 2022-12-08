@@ -1,6 +1,7 @@
-import PortalApi from 'src/api/OilcaseApi.js'
+import PortalApi from 'src/api/OilCaseApi.js'
 import OrbitControls from 'three-orbitcontrols'
-import {  GridHelper } from 'three'
+import {GridHelper} from 'three'
+import * as THREE from 'three'
 import SecureLS from 'secure-ls'
 import {date} from "quasar";
 
@@ -30,93 +31,7 @@ export const OutSideMixin = {
     this.secLS = new SecureLS();
   },
   methods: {
-    sumZatrIssl(item) {
-      return item.selWellIssl.length * vm.mnyWellIssl1 +
-        item.selWellIssl2.length * vm.mnyWellIssl2 +
-        item.selWellIssl3.length * vm.mnyWellIssl3 +
-        item.selWellIssl4.length * vm.mnyWellIssl4
-    },
-    getWellMoneyAll(deep) {
-      return vm.mnyWellBase +
-        (deep >= 2700 ? 500 : 0) +
-        Math.floor((deep - 2700) / 10) * 10
-    },
-    getWellMoneyDrill(deep) {
-      return (deep >= 2700 ? 500 : 0) + Math.floor((deep - 2700) / 10) * 10
-    },
-    getFormatedDate: function (data, mode) {
-      if (mode === 1) {
-        return date.formatDate(data, "DD.MM.YYYY");
-      } else if (mode === 2) {
-        return date.formatDate(data, "HH:mm:ss");
-      } else {
-        return date.formatDate(data, "DD.MM.YYYY HH:mm:ss");
-      }
-    },
 
-    getSeismTypeMoney1(seistype) {
-      let strst = "";
-      if (Array.isArray(seistype)) {
-        seistype.forEach(el => {
-          if (el === 'seismR') {
-            if (strst !== '') strst += " + ";
-            strst += "5000 т.р. ";
-          } else if (el === 'seismM') {
-            if (strst !== '') strst += " + ";
-            strst += "1000 OilCoin";
-          } else if (el === 'seismT') {
-            if (strst !== '') strst += " + ";
-            strst += "11000 т.р. ";
-          }
-        });
-      }
-
-      return strst;
-    },
-    getSeismTypeMoney2(seistype) {
-      let strst = "";
-      seistype.forEach(el => {
-        if (el === 'seismR') {
-          if (strst !== '') strst += " + ";
-          strst += "5000 т.р. ";
-        } else if (el === 'seismM') {
-          if (strst !== '') strst += " + ";
-          strst += "1000 OilCoin";
-        } else if (el === 'seismT') {
-          if (strst !== '') strst += " + ";
-          strst += "35000 т.р. ";
-        }
-      });
-      return strst;
-    },
-
-    getSeismTypeText(seistype) {
-      let strst = "";
-      if (Array.isArray(seistype)) {
-        seistype.forEach(el => {
-          if (el === 'seismR') {
-            if (strst !== '') strst += ", ";
-            strst += "Временной разрез";
-          } else if (el === 'seismM') {
-            if (strst !== '') strst += ", ";
-            strst += "Интерпретация по глубине.";
-          } else if (el === 'seismT') {
-            if (strst !== '') strst += ", ";
-            strst += "Интерпретация по времени";
-          }
-        });
-      } else {
-        if (seistype === 'seismR') {
-          strst += "Временной разрез";
-        } else if (seistype === 'seismM') {
-          strst += "Интерпретация по глубине.";
-        } else if (seistype === 'seismT') {
-          strst += "Интерпретация по времени";
-        }
-      }
-
-      return strst;
-    },
     async build3DSurf(iCell_l, iCell_r, jCell_l, jCell_r, seismType, userId) {
       try {
         vm = this;
@@ -183,7 +98,6 @@ export const OutSideMixin = {
         console.log(error);
       }
     },
-
     async build2DProfOneSeism(arrData, zLevel, cType, NumColor, iCell, jCell) {
       vm = this;
 
@@ -250,35 +164,6 @@ export const OutSideMixin = {
 
       plane.position.set(xOffset, yOffset, zOffset);
       this.scene.add(plane);
-    },
-    async build2DProfile(iCell, jCell, cType, seismType) {
-      try {
-        vm = this;
-        //   this.buildCheck();
-
-        if (cType === 'vert') {
-          this.strTempFromApi = await PortalApi.Get2DLayer("i", iCell);
-        } else {
-          this.strTempFromApi = await PortalApi.Get2DLayer("j", jCell);
-        }
-
-        let zMin = this.dCommonZLevel; //this.getMin(this.strTempFromApi, 'zCoord');
-        //let zMin = this.getMin(this.strTempFromApi, 'zCoord');
-        let zMinLevel = zMin - 2;
-        let sallLayers = this.uniqueLayers(this.strTempFromApi);
-
-        let iCurNUm = 1;
-
-        for (let index in sallLayers) {
-          let curLayer = sallLayers[index];
-          let curCoords = this.strTempFromApi.filter(d => d.sLayerName === curLayer.sLayerName);
-          this.build2DProfOne(curCoords, zMinLevel, cType, iCurNUm, iCell, jCell);
-          iCurNUm++;
-        }
-
-      } catch (error) {
-        console.log(error);
-      }
     },
     async build2DProfOne(arrData, zLevel, cType, NumColor, iCell, jCell) {
       vm = this;
@@ -418,195 +303,89 @@ export const OutSideMixin = {
 
       this.drSurfCount += 1;
     },
-    async build2DProfOne_bkp(arrData, zLevel, cType, NumColor, iCell, jCell) {
-      vm = this;
-
-      let colMin = this.getMin(arrData, 'dcol');
-      let colMax = this.getMax(arrData, 'dcol');
-      let colMid = colMax - colMin;
-
-      let rowMin = this.getMin(arrData, 'drow');
-      let rowMax = this.getMax(arrData, 'drow');
-      let rowMid = rowMax - rowMin;
-
-
-      let zMin = this.dCommonZLevel; //this.getMin(arrData, 'zCoord');
-      let zMax = this.getMax(arrData, 'zCoord');
-      let zMid = zMax - zMin;
-      let scaleZKoef = -0.1; // 100 / zMid;
-      let cellSize = 2 * this.gridSize / (this.gridCount * 2);
-      let gridHalf = this.gridSize / 2;
-      //  let zOffset = (zMin - zLevel);
-      let arrLinePoints = [];
-      let oneStep = this.gridSize / arrData.length;
-
-
-      arrData.forEach(element => {
-        let sd = (zMin - element.zCoord) * scaleZKoef * 10;
-
-        if (cType === 'vert') {
-          let curVector = new THREE.Vector3(-gridHalf + cellSize * iCell - (cellSize / 2), gridHalf - oneStep * element.dcol, sd);
-          arrLinePoints.push(curVector);
-        } else {
-          let curVector = new THREE.Vector3(-gridHalf + oneStep * element.drow, gridHalf - cellSize * jCell + (cellSize / 2), sd);
-          arrLinePoints.push(curVector);
-        }
-
-      });
-      let curve = new THREE.CatmullRomCurve3(arrLinePoints);
-
-      let geometry = new THREE.TubeGeometry(curve, 10, 0.2, 8, false);
-
-      if (cType === 'vert') {
-        let tumaterial = new THREE.MeshBasicMaterial({
-          color: this.getColorHSL(NumColor * 40), //color: 0xff0000
-          //color: 0x0000ff
-        });
-      } else {
-        let tumaterial = new THREE.MeshBasicMaterial({
-          color: this.getColorHSL(NumColor * 40), //color: 0xff0000
-          //color: 0xff0000
-        });
-      }
-
-      if (cType === 'vert') {
-        let xOffset = 0;
-        let yOffset = cellSize / 2;
-      } else {
-        let xOffset = -cellSize / 2;
-        let yOffset = 0;
-
-      }
-      let zOffset = 0;
-      (zMin - zLevel);
-
-      let plane = new THREE.Mesh(geometry, tumaterial);
-
-      plane.position.set(xOffset, yOffset, zOffset);
-      this.scene.add(plane);
-    },
-    async builSurfObj(dCol, dRow, NumColor, objType) {
-      vm = this;
-
-      let zMinLevel = this.dCommonZLevel;
-
-      let cellSize = 2 * this.gridSize / (this.gridCount * 2);
-      let gridHalf = this.gridSize / 2;
-      let xOffset = -gridHalf + cellSize * dCol - (cellSize / 2);
-      let yOffset = gridHalf - cellSize * dRow + (cellSize / 2);
-      let scaleZKoef = 0.3;
-
-      // let fbxloader = new THREE.GLTFLoader();
-      //let loader = new GLTFLoader();
-      /*
-            fbxloader.load('tube.json', function (geometry) {
-              this.scene.add(geometry);
-              // if the model is loaded successfully, add it to your scene here
-            }, undefined, function (err) {
-              console.error(err);
-            });
-      */
-      let curve = new THREE.CatmullRomCurve3([
-        new THREE.Vector3(1, 1, 20),
-        new THREE.Vector3(1, 1, -20)
-      ]);
-      let geometry = new THREE.TubeGeometry(curve, 5, 1.1, 8, false);
-      let tumaterial = new THREE.MeshBasicMaterial({
-        //color: this.getColorHSL(NumColor * 40)
-        // color: this.setHexColor(0xff7043)
-      });
-      tumaterial.color.setHex(0xff2190);
-      let plane = new THREE.Mesh(geometry, tumaterial);
-      let zOffset = 0;
-      plane.position.set(xOffset, yOffset, zOffset);
-      this.scene.add(plane);
-
-
-    },
-    async buildWell(dCol, dRow, NumColor, drilldeep, tappedLevels) {
-      vm = this;
-
-      let zMinLevel = this.dCommonZLevel;
-
-      let cellSize = 2 * this.gridSize / (this.gridCount * 2);
-      let gridHalf = this.gridSize / 2;
-      let xOffset = -gridHalf + cellSize * dCol - (cellSize / 2);
-      let yOffset = gridHalf - cellSize * dRow + (cellSize / 4);
-      let scaleZKoef = 0.3;
-      var geometry
-      var plane
-
-      if (tappedLevels.length === 0) {
-        let curve = new THREE.CatmullRomCurve3([
-          new THREE.Vector3(1, 1, this.dSurfTop),
-          new THREE.Vector3(1, 1, -20)
-        ]);
-        geometry = new THREE.TubeGeometry(curve, 5, 1.1, 8, false);
-        let tumaterial = new THREE.MeshBasicMaterial({
-          //color: this.getColorHSL(NumColor * 40)
-          // color: this.setHexColor(0xff7043)
-        });
-        tumaterial.color.setHex(0xff7043);
-        plane = new THREE.Mesh(geometry, tumaterial);
-        let zOffset = 0;
-        plane.position.set(xOffset, yOffset, zOffset);
-        this.scene.add(plane);
-      } else {
-        let levDeep = -10;
-        let levDeepPrev = -10;
-        let sTTw = 0;
-        for (let il = 0; il < tappedLevels.length; il++) {
-          sTTw = (-1) * zMinLevel - tappedLevels[il].yLevelMetr;
-
-          levDeep = sTTw * scaleZKoef;
-          let curve = new THREE.CatmullRomCurve3([
-            new THREE.Vector3(1, 1, levDeep),
-            new THREE.Vector3(1, 1, levDeepPrev)
-          ]);
-          geometry = new THREE.TubeGeometry(curve, 5, 1.1, 8, false);
-          let tumaterial = new THREE.MeshBasicMaterial({
-            //  color: this.getColorHSL((il+1) * 40)
-          });
-          tumaterial.color.setHex(0xff7043);
-
-          plane = new THREE.Mesh(geometry, tumaterial);
-          let zOffset = 0;
-          plane.position.set(xOffset, yOffset, zOffset);
-          this.scene.add(plane);
-
-          geometry = new THREE.PlaneGeometry(8, 8, 1);
-          let material = new THREE.MeshBasicMaterial({
-            // color:this.getColorHSL((il+1) * 4),
-            side: THREE.DoubleSide
-          });
-          material.color.setHex(0x494f54);
-          //#494f54
-
-          plane = new THREE.Mesh(geometry, material);
-          let zLevelOffset = levDeep;
-          plane.position.set(xOffset, yOffset, zLevelOffset);
-          this.scene.add(plane);
-
-          levDeepPrev = levDeep;
-        }
-
-        let curve = new THREE.CatmullRomCurve3([
-          new THREE.Vector3(1, 1, 120),
-          new THREE.Vector3(1, 1, levDeepPrev)
-        ]);
-        geometry = new THREE.TubeGeometry(curve, 5, 1.1, 8, false);
-        let tumaterial = new THREE.MeshBasicMaterial({
-          //color: this.getColorHSL(tappedLevels.length+4)
-        });
-        tumaterial.color.setHex(0xff7043);
-        plane = new THREE.Mesh(geometry, tumaterial);
-        let zOffset = 0;
-        plane.position.set(xOffset, yOffset, zOffset);
-        this.scene.add(plane);
-
-      }
-    },
-    async buildWell5(dCol, dRow, NumColor, drilldeep, tappedLevels, wellitem) {
+    // async buildWell(dCol, dRow, NumColor, drilldeep, tappedLevels) {
+    //   vm = this;
+    //
+    //   let zMinLevel = this.dCommonZLevel;
+    //
+    //   let cellSize = 2 * this.gridSize / (this.gridCount * 2);
+    //   let gridHalf = this.gridSize / 2;
+    //   let xOffset = -gridHalf + cellSize * dCol - (cellSize / 2);
+    //   let yOffset = gridHalf - cellSize * dRow + (cellSize / 4);
+    //   let scaleZKoef = 0.3;
+    //   var geometry
+    //   var plane
+    //
+    //   if (tappedLevels.length === 0) {
+    //     let curve = new THREE.CatmullRomCurve3([
+    //       new THREE.Vector3(1, 1, this.dSurfTop),
+    //       new THREE.Vector3(1, 1, -20)
+    //     ]);
+    //     geometry = new THREE.TubeGeometry(curve, 5, 1.1, 8, false);
+    //     let tumaterial = new THREE.MeshBasicMaterial({
+    //       //color: this.getColorHSL(NumColor * 40)
+    //       // color: this.setHexColor(0xff7043)
+    //     });
+    //     tumaterial.color.setHex(0xff7043);
+    //     plane = new THREE.Mesh(geometry, tumaterial);
+    //     let zOffset = 0;
+    //     plane.position.set(xOffset, yOffset, zOffset);
+    //     this.scene.add(plane);
+    //   } else {
+    //     let levDeep = -10;
+    //     let levDeepPrev = -10;
+    //     let sTTw = 0;
+    //     for (let il = 0; il < tappedLevels.length; il++) {
+    //       sTTw = (-1) * zMinLevel - tappedLevels[il].yLevelMetr;
+    //
+    //       levDeep = sTTw * scaleZKoef;
+    //       let curve = new THREE.CatmullRomCurve3([
+    //         new THREE.Vector3(1, 1, levDeep),
+    //         new THREE.Vector3(1, 1, levDeepPrev)
+    //       ]);
+    //       geometry = new THREE.TubeGeometry(curve, 5, 1.1, 8, false);
+    //       let tumaterial = new THREE.MeshBasicMaterial({
+    //         //  color: this.getColorHSL((il+1) * 40)
+    //       });
+    //       tumaterial.color.setHex(0xff7043);
+    //
+    //       plane = new THREE.Mesh(geometry, tumaterial);
+    //       let zOffset = 0;
+    //       plane.position.set(xOffset, yOffset, zOffset);
+    //       this.scene.add(plane);
+    //
+    //       geometry = new THREE.PlaneGeometry(8, 8, 1);
+    //       let material = new THREE.MeshBasicMaterial({
+    //         // color:this.getColorHSL((il+1) * 4),
+    //         side: THREE.DoubleSide
+    //       });
+    //       material.color.setHex(0x494f54);
+    //       //#494f54
+    //
+    //       plane = new THREE.Mesh(geometry, material);
+    //       let zLevelOffset = levDeep;
+    //       plane.position.set(xOffset, yOffset, zLevelOffset);
+    //       this.scene.add(plane);
+    //
+    //       levDeepPrev = levDeep;
+    //     }
+    //
+    //     let curve = new THREE.CatmullRomCurve3([
+    //       new THREE.Vector3(1, 1, 120),
+    //       new THREE.Vector3(1, 1, levDeepPrev)
+    //     ]);
+    //     geometry = new THREE.TubeGeometry(curve, 5, 1.1, 8, false);
+    //     let tumaterial = new THREE.MeshBasicMaterial({
+    //       //color: this.getColorHSL(tappedLevels.length+4)
+    //     });
+    //     tumaterial.color.setHex(0xff7043);
+    //     plane = new THREE.Mesh(geometry, tumaterial);
+    //     let zOffset = 0;
+    //     plane.position.set(xOffset, yOffset, zOffset);
+    //     this.scene.add(plane);
+    //   }
+    // },
+    async buildWell5(dCol, dRow, NumColor, drilldeep, wellitem, minZ, maxZ) {
       vm = this;
 
       let zMinLevel = this.dCommonZLevel;
@@ -629,7 +408,7 @@ export const OutSideMixin = {
         yOffset2 = cellSize * (dRow - wellitem.toeJ);
       }
       let scaleZKoef = 0.3;
-
+      let tappedLevels = [1, 2, 3]
       if (tappedLevels.length === 0) {
         let curve1 = new THREE.CatmullRomCurve3([
           new THREE.Vector3(1, 1, this.dSurfTop),
@@ -672,9 +451,13 @@ export const OutSideMixin = {
         for (let il = 0; il < tappedLevels.length; il++) {
           sTTw = (-1) * zMinLevel - tappedLevels[il].yLevelMetr;
           levDeep = sTTw * scaleZKoef;
+          // let curve = new THREE.CatmullRomCurve3([
+          //   new THREE.Vector3(1, 1, levDeep),
+          //   new THREE.Vector3(1, 1, levDeepPrev)
+          // ]);
           let curve = new THREE.CatmullRomCurve3([
-            new THREE.Vector3(1, 1, levDeep),
-            new THREE.Vector3(1, 1, levDeepPrev)
+            new THREE.Vector3(1, 1, 100),
+            new THREE.Vector3(1, 1, 0)
           ]);
           geometry = new THREE.TubeGeometry(curve, 5, 1.1, 8, false);
           let tumaterial = new THREE.MeshBasicMaterial({
@@ -703,9 +486,11 @@ export const OutSideMixin = {
           levDeepPrev = levDeep;
         }
 
+        let firstZ = (drilldeep - maxZ) / (minZ - maxZ) * 100
+
         let curve = new THREE.CatmullRomCurve3([
-          new THREE.Vector3(1, 1, 120),
-          new THREE.Vector3(1, 1, levDeepPrev)
+          new THREE.Vector3(1, 1, 100),
+          new THREE.Vector3(1, 1, -firstZ)
         ]);
         geometry = new THREE.TubeGeometry(curve, 5, 1.1, 8, false);
         let tumaterial = new THREE.MeshBasicMaterial({
@@ -716,76 +501,85 @@ export const OutSideMixin = {
         let zOffset = 0;
         plane.position.set(xOffset, yOffset, zOffset);
         this.scene.add(plane);
+
+
+        if (wellitem.toeI !== undefined) {
+          let secondZ = (wellitem.toeK - maxZ) / (minZ - maxZ) * 100
+          console.log('firstZ')
+          console.log(firstZ)
+          console.log(wellitem.toeK, minZ, maxZ)
+          console.log(dCol, wellitem.toeI, 200)
+          console.log((wellitem.toeI - dCol) * 8)
+          curve = new THREE.CatmullRomCurve3([
+            new THREE.Vector3(1, 1, -firstZ),
+            new THREE.Vector3((wellitem.toeI - dCol) * 8,
+              -(wellitem.toeJ - dRow) * 8, -secondZ)
+          ]);
+
+          // curve = new THREE.CatmullRomCurve3([
+          //   new THREE.Vector3(1, 1, -firstZ),
+          //   new THREE.Vector3( 25, -25,  -secondZ)
+          // ]);
+          geometry = new THREE.TubeGeometry(curve, 5, 1.1, 8, false);
+          tumaterial = new THREE.MeshBasicMaterial({
+            //color: this.getColorHSL(tappedLevels.length+4)
+          });
+          tumaterial.color.setHex(0xff7043);
+          plane = new THREE.Mesh(geometry, tumaterial);
+          zOffset = 0;
+          plane.position.set(xOffset, yOffset, zOffset);
+          this.scene.add(plane);
+        }
       }
     },
+
+    async getArrDictParams() {
+      await PortalApi.GetDictValues().then((response) => {
+        if (response.status === 200) {
+          this.arrDictParams = response.data;
+          this.secLS.set('ocDictList', this.arrDictParams)
+        }
+      });
+
+    },
+    async doCheckDictHash() {
+      try {
+        await PortalApi.getDictHash(0).then(async resp => {
+          if (resp.status == 200) {
+            let localHash = localStorage.getItem("ocDictHash");
+            if (localHash !== resp.data || !this.secLS.ls["ocDictList"]) {
+              await this.getArrDictParams().then(r => {
+                return "doCheckDictHash";
+              });
+
+              localStorage.setItem("ocDictHash", resp.data);
+            } else {
+              this.arrDictParams = this.secLS.get('ocDictList');
+            }
+
+          } else {
+            return 'doCheckDictHash error';
+          }
+
+        }).catch(err => {
+          return 'doCheckDictHash error ' + err;
+        })
+
+
+      } catch (err) {
+        return 'getProfileHash error ' + err;
+      }
+    },
+    async SaveStorage2DBData(iGameStep) {
+      // Увеличивать шаг на сервере
+      await PortalApi.DoSaveCase(iGameStep);
+    },
+
     getMin: function (thisdata, sParam) {
       return thisdata.reduce((min, p) => p[sParam] < min ? p[sParam] : min, thisdata[0][sParam]);
     },
     getMax: function (thisdata, sParam) {
       return thisdata.reduce((max, p) => p[sParam] > max ? p[sParam] : max, thisdata[0][sParam]);
-    },
-    makeTextSprite(message, parameters) {
-      if (parameters === undefined) parameters = {};
-
-      let fontface = parameters.hasOwnProperty("fontface") ?
-        parameters["fontface"] : "Arial";
-
-      let fontsize = parameters.hasOwnProperty("fontsize") ?
-        parameters["fontsize"] : 14;
-
-      let borderThickness = parameters.hasOwnProperty("borderThickness") ?
-        parameters["borderThickness"] : 1;
-
-      let borderColor = parameters.hasOwnProperty("borderColor") ?
-        parameters["borderColor"] : {
-          r: 0,
-          g: 0,
-          b: 0,
-          a: 1.0
-        };
-
-      let backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
-        parameters["backgroundColor"] : {
-          r: 255,
-          g: 255,
-          b: 255,
-          a: 1.0
-        };
-      //let spriteAlignment = THREE.SpriteAlignment.topLeft;
-
-      let canvas = document.createElement('canvas');
-      let context = canvas.getContext('2d');
-      context.font = "Bold " + fontsize + "px " + fontface;
-
-      // get size data (height depends only on font size)
-      let metrics = context.measureText(message);
-      let textWidth = metrics.width;
-
-      // background color
-      context.fillStyle = "rgba(" + backgroundColor.r + "," + backgroundColor.g + "," +
-        backgroundColor.b + "," + backgroundColor.a + ")";
-      // border color
-      context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + "," +
-        borderColor.b + "," + borderColor.a + ")";
-
-      context.lineWidth = borderThickness;
-      this.roundRect(context, borderThickness / 2, borderThickness / 2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
-      // 1.4 is extra height factor for text below baseline: g,j,p,q.
-
-      // text color
-      context.fillStyle = "rgba(0, 0, 0, 1.0)";
-      context.fillText(message, borderThickness, fontsize + borderThickness);
-
-      // canvas contents will be used for a texture
-      let texture = new THREE.Texture(canvas)
-      texture.needsUpdate = true;
-      let spriteMaterial = new THREE.SpriteMaterial({
-        map: texture,
-        useScreenCoordinates: true,
-      });
-      let sprite = new THREE.Sprite(spriteMaterial);
-      sprite.scale.set(100, 50, 1.0);
-      return sprite;
     },
     roundRect(ctx, x, y, w, h, r) {
       ctx.beginPath();
@@ -802,79 +596,6 @@ export const OutSideMixin = {
       ctx.fill();
       ctx.stroke();
     },
-    // prepareSceneMin() {
-    //   vm = this;
-    //   // scene, camera, renderer
-    //   this.curObj = this.obj;
-    //   let container, renderer, controls;
-    //
-    //   this.scene = new THREE.Scene();
-    //   let SCREEN_WIDTH = 1200,
-    //     SCREEN_HEIGHT = 800;
-    //
-    //   // let axes = new THREE.AxisHelper(100);
-    //   // this.scene.add(axes);
-    //   this.camera = new THREE.PerspectiveCamera(45, SCREEN_WIDTH / SCREEN_HEIGHT, 0.1, 1000);
-    //   this.camera.position.set(180, 120, 100);
-    //   //camera.position.set( 15, 10, - 15 );
-    //
-    //
-    //   renderer = new THREE.WebGLRenderer({
-    //     antialias: true
-    //   });
-    //   renderer.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
-    //   container = document.getElementById('stage');
-    //
-    //   let positions = [
-    //     [1, 1, 1],
-    //     [-1, -1, 1],
-    //     [-1, 1, 1],
-    //     [1, -1, 1]
-    //   ];
-    //   //  this.scene.add(new THREE.AmbientLight(0x111111));
-    //   for (let i = 0; i < 4; i++) {
-    //     let light = new THREE.DirectionalLight(0xdddddd);
-    //     light.position.set(positions[i][0], positions[i][1], 0.4 * positions[i][2]);
-    //     this.scene.add(light);
-    //   }
-    //
-    //   renderer.setClearColor(0xEEEEEE, 1.0);
-    //   // Append to DOM
-    //   orbitControls = new OrbitControls(this.camera, renderer.domElement);
-    //   this.$refs.canvasContainer.appendChild(renderer.domElement);
-    //   this.$refs.canvasContainer.addEventListener('dblclick', this.onMouseClick, false);
-    //   //draw scene grid
-    //
-    //
-    //   this.scene.rotation.x = -Math.PI / 2;
-    //   /*
-    //         let spritey = this.makeTextSprite( " i 24 j 1 ", { fontsize: 10,   } );
-    //         spritey.position.set(150,100,-20);
-    //         this.scene.add( spritey );
-    //   */
-    //   //arrow nord
-    //   let radius = 2;
-    //   let height = 18.0;
-    //   let radialSegments = 21;
-    //   let geometry = new THREE.ConeBufferGeometry(radius, height, radialSegments);
-    //
-    //   let tumaterial = new THREE.MeshBasicMaterial({
-    //     color: 0x0000ff
-    //   });
-    //   let plane = new THREE.Mesh(geometry, tumaterial);
-    //   plane.position.set(105, 5, 0);
-    //   //  this.scene.add(plane);
-    //   // this.projector = new THREE.Projector();
-    //   let animate = function () {
-    //     requestAnimationFrame(animate);
-    //     renderer.render(vm.scene, vm.camera);
-    //
-    //
-    //   };
-    //   animate();
-    //
-    //   this.bShowScene = true;
-    // },
     prepareScene() {
       vm = this;
       // scene, camera, renderer
@@ -950,11 +671,6 @@ export const OutSideMixin = {
 
       this.bShowScene = true;
     },
-    // setHexColor: function (hexcolor) {
-    //   let color = new THREE.Color();
-    //   color.setColor(hexcolor);
-    //   return color;
-    // },
     getColorHSL: function (i) {
       let hue = i * 1.2 / 360;
       let color = new THREE.Color();
@@ -968,6 +684,49 @@ export const OutSideMixin = {
         });
       }, {});
     },
+
+    getWellMoneyAll(deep) {
+      return vm.mnyWellBase +
+        (deep >= 2700 ? 500 : 0) +
+        Math.floor((deep - 2700) / 10) * 10
+    },
+    getWellMoneyDrill(deep) {
+      return (deep >= 2700 ? 500 : 0) + Math.floor((deep - 2700) / 10) * 10
+    },
+    getSeismTypeText(seistype) {
+      let strst = "";
+      if (Array.isArray(seistype)) {
+        seistype.forEach(el => {
+          if (el === 'seismR') {
+            if (strst !== '') strst += ", ";
+            strst += "Временной разрез";
+          } else if (el === 'seismM') {
+            if (strst !== '') strst += ", ";
+            strst += "Интерпретация по глубине.";
+          } else if (el === 'seismT') {
+            if (strst !== '') strst += ", ";
+            strst += "Интерпретация по времени";
+          }
+        });
+      } else {
+        if (seistype === 'seismR') {
+          strst += "Временной разрез";
+        } else if (seistype === 'seismM') {
+          strst += "Интерпретация по глубине.";
+        } else if (seistype === 'seismT') {
+          strst += "Интерпретация по времени";
+        }
+      }
+
+      return strst;
+    },
+
+
+    // setHexColor: function (hexcolor) {
+    //   let color = new THREE.Color();
+    //   color.setColor(hexcolor);
+    //   return color;
+    // },
     // async LoadDBData2Storage() {
     //   try {
     //     this.megaObj = this.secLS.get('ocData');
@@ -982,90 +741,292 @@ export const OutSideMixin = {
     //     console.log('LoadDBData2Storage error:' + e)
     //   }
     // },
-    async doSendUserScreen(sdsd) {
+    makeTextSprite(message, parameters) {
+      if (parameters === undefined) parameters = {};
 
+      let fontface = parameters.hasOwnProperty("fontface") ?
+        parameters["fontface"] : "Arial";
+
+      let fontsize = parameters.hasOwnProperty("fontsize") ?
+        parameters["fontsize"] : 14;
+
+      let borderThickness = parameters.hasOwnProperty("borderThickness") ?
+        parameters["borderThickness"] : 1;
+
+      let borderColor = parameters.hasOwnProperty("borderColor") ?
+        parameters["borderColor"] : {
+          r: 0,
+          g: 0,
+          b: 0,
+          a: 1.0
+        };
+
+      let backgroundColor = parameters.hasOwnProperty("backgroundColor") ?
+        parameters["backgroundColor"] : {
+          r: 255,
+          g: 255,
+          b: 255,
+          a: 1.0
+        };
+      //let spriteAlignment = THREE.SpriteAlignment.topLeft;
+
+      let canvas = document.createElement('canvas');
+      let context = canvas.getContext('2d');
+      context.font = "Bold " + fontsize + "px " + fontface;
+
+      // get size data (height depends only on font size)
+      let metrics = context.measureText(message);
+      let textWidth = metrics.width;
+
+      // background color
+      context.fillStyle = "rgba(" + backgroundColor.r + "," + backgroundColor.g + "," +
+        backgroundColor.b + "," + backgroundColor.a + ")";
+      // border color
+      context.strokeStyle = "rgba(" + borderColor.r + "," + borderColor.g + "," +
+        borderColor.b + "," + borderColor.a + ")";
+
+      context.lineWidth = borderThickness;
+      this.roundRect(context, borderThickness / 2, borderThickness / 2, textWidth + borderThickness, fontsize * 1.4 + borderThickness, 6);
+      // 1.4 is extra height factor for text below baseline: g,j,p,q.
+
+      // text color
+      context.fillStyle = "rgba(0, 0, 0, 1.0)";
+      context.fillText(message, borderThickness, fontsize + borderThickness);
+
+      // canvas contents will be used for a texture
+      let texture = new THREE.Texture(canvas)
+      texture.needsUpdate = true;
+      let spriteMaterial = new THREE.SpriteMaterial({
+        map: texture,
+        useScreenCoordinates: true,
+      });
+      let sprite = new THREE.Sprite(spriteMaterial);
+      sprite.scale.set(100, 50, 1.0);
+      return sprite;
+    },
+    getFormatedDate: function (data, mode) {
+      if (mode === 1) {
+        return date.formatDate(data, "DD.MM.YYYY");
+      } else if (mode === 2) {
+        return date.formatDate(data, "HH:mm:ss");
+      } else {
+        return date.formatDate(data, "DD.MM.YYYY HH:mm:ss");
+      }
+    },
+    getSeismTypeMoney1(seistype) {
+      let strst = "";
+      if (Array.isArray(seistype)) {
+        seistype.forEach(el => {
+          if (el === 'seismR') {
+            if (strst !== '') strst += " + ";
+            strst += "5000 т.р. ";
+          } else if (el === 'seismM') {
+            if (strst !== '') strst += " + ";
+            strst += "1000 OilCoin";
+          } else if (el === 'seismT') {
+            if (strst !== '') strst += " + ";
+            strst += "11000 т.р. ";
+          }
+        });
+      }
+
+      return strst;
+    },
+    getSeismTypeMoney2(seistype) {
+      let strst = "";
+      seistype.forEach(el => {
+        if (el === 'seismR') {
+          if (strst !== '') strst += " + ";
+          strst += "5000 т.р. ";
+        } else if (el === 'seismM') {
+          if (strst !== '') strst += " + ";
+          strst += "1000 OilCoin";
+        } else if (el === 'seismT') {
+          if (strst !== '') strst += " + ";
+          strst += "35000 т.р. ";
+        }
+      });
+      return strst;
+    },
+    async doLoadCaseData() {
+      // if (this.secLS === null || this.secLS.ls['ocData'] === null) {
+      //   return;
+      // }
+      // this.megaObj = this.secLS.get('ocData');
+      // if (this.megaObj !== null) {
+      //   if (this.megaObj.arrDrillsList !== null && this.megaObj.arrDrillsList.length > 0) {
+      //     this.arrDrillsList = JSON.parse(this.megaObj.arrDrillsList);
+      //   }
+      //   if (this.megaObj.arr2DProfileList !== null && this.megaObj.arr2DProfileList.length > 0) {
+      //     this.arr2DProfileList = JSON.parse(this.megaObj.arr2DProfileList);
+      //   }
+      //   if (this.megaObj.arr3DProfileList !== null && this.megaObj.arr3DProfileList.length > 0) {
+      //     this.arr3DProfileList = JSON.parse(this.megaObj.arr3DProfileList);
+      //   }
+      //   if (this.megaObj.arrSurfObjList !== null && this.megaObj.arrSurfObjList.length > 0) {
+      //     this.arrSurfObjList = JSON.parse(this.megaObj.arrSurfObjList);
+      //   }
+      //   if (this.megaObj.arrCommon !== null && typeof this.megaObj.arrCommon === 'string'.startsWith('{')) {
+      //     this.arrCommon = JSON.parse(this.megaObj.arrCommon);
+      //   } else {
+      //     if (typeof this.megaObj.arrCommon === "object") {
+      //       this.arrCommon = this.megaObj.arrCommon;
+      //     }
+      //   }
+      // }
+
+      this.bStorageDataEmpty = false;
+      this.dCommonZLevel = -2850;
+      this.dCommonZLevelSeism1 = -2850;
+      this.dCommonZLevelSeism2 = -2550;
+
+      // if (this.arrDrillsList.length > 0 || this.arr2DProfileList.length > 0 || this.arr3DProfileList.length > 0) {
+      //   this.bStorageDataEmpty = false;
+      //   this.dCommonZLevel = -2850;
+      //   this.dCommonZLevelSeism1 = -2850;
+      //   this.dCommonZLevelSeism2 = -2550;
+      // } else {
+      //   this.bStorageDataEmpty = true;
+      // }
+    },
+    async doSendUserScreen(sdsd) {
       await PortalApi.SendScreenShot(sdsd).then((resp) => {
         return resp;
       })
     },
-    async getArrDictParams() {
-      await PortalApi.GetDictValues().then((response) => {
-        if (response.status === 200) {
-          this.arrDictParams = response.data;
-          this.secLS.set('ocDictList', this.arrDictParams)
-        }
+    async builSurfObj(dCol, dRow, NumColor, objType) {
+      vm = this;
+
+      let zMinLevel = this.dCommonZLevel;
+
+      let cellSize = 2 * this.gridSize / (this.gridCount * 2);
+      let gridHalf = this.gridSize / 2;
+      let xOffset = -gridHalf + cellSize * dCol - (cellSize / 2);
+      let yOffset = gridHalf - cellSize * dRow + (cellSize / 2);
+      let scaleZKoef = 0.3;
+
+      // let fbxloader = new THREE.GLTFLoader();
+      //let loader = new GLTFLoader();
+      /*
+            fbxloader.load('tube.json', function (geometry) {
+              this.scene.add(geometry);
+              // if the model is loaded successfully, add it to your scene here
+            }, undefined, function (err) {
+              console.error(err);
+            });
+      */
+      let curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(1, 1, 20),
+        new THREE.Vector3(1, 1, -20)
+      ]);
+      let geometry = new THREE.TubeGeometry(curve, 5, 1.1, 8, false);
+      let tumaterial = new THREE.MeshBasicMaterial({
+        //color: this.getColorHSL(NumColor * 40)
+        // color: this.setHexColor(0xff7043)
       });
+      tumaterial.color.setHex(0xff2190);
+      let plane = new THREE.Mesh(geometry, tumaterial);
+      let zOffset = 0;
+      plane.position.set(xOffset, yOffset, zOffset);
+      this.scene.add(plane);
+
 
     },
-    async doCheckDictHash() {
+    async build2DProfile(iCell, jCell, cType, seismType) {
       try {
-        await PortalApi.getDictHash(0).then(async resp => {
-          if (resp.status == 200) {
-            let localHash = localStorage.getItem("ocDictHash");
-            if (localHash !== resp.data || !this.secLS.ls["ocDictList"]) {
-              await this.getArrDictParams().then(r => {
-                return "doCheckDictHash";
-              });
+        vm = this;
+        //   this.buildCheck();
 
-              localStorage.setItem("ocDictHash", resp.data);
-            } else {
-              this.arrDictParams = this.secLS.get('ocDictList');
-            }
-
-          } else {
-            return 'doCheckDictHash error';
-          }
-
-        }).catch(err => {
-          return 'doCheckDictHash error ' + err;
-        })
-
-
-      } catch (err) {
-        return 'getProfileHash error ' + err;
-      }
-    },
-    async SaveStorage2DBData(iGameStep) {
-      // Увеличивать шаг на сервере
-      await PortalApi.DoSaveCase(iGameStep);
-    },
-
-    async doLoadCaseData() {
-      return
-      if (this.secLS === null || this.secLS.ls['ocData'] === null) {
-        return;
-      }
-      this.megaObj = this.secLS.get('ocData');
-      if (this.megaObj !== null) {
-        if (this.megaObj.arrDrillsList !== null && this.megaObj.arrDrillsList.length > 0) {
-          this.arrDrillsList = JSON.parse(this.megaObj.arrDrillsList);
-        }
-        if (this.megaObj.arr2DProfileList !== null && this.megaObj.arr2DProfileList.length > 0) {
-          this.arr2DProfileList = JSON.parse(this.megaObj.arr2DProfileList);
-        }
-        if (this.megaObj.arr3DProfileList !== null && this.megaObj.arr3DProfileList.length > 0) {
-          this.arr3DProfileList = JSON.parse(this.megaObj.arr3DProfileList);
-        }
-        if (this.megaObj.arrSurfObjList !== null && this.megaObj.arrSurfObjList.length > 0) {
-          this.arrSurfObjList = JSON.parse(this.megaObj.arrSurfObjList);
-        }
-        if (this.megaObj.arrCommon !== null && typeof this.megaObj.arrCommon === 'string'.startsWith('{')) {
-          this.arrCommon = JSON.parse(this.megaObj.arrCommon);
+        if (cType === 'vert') {
+          this.strTempFromApi = await PortalApi.Get2DLayer("i", iCell);
         } else {
-          if (typeof this.megaObj.arrCommon === "object") {
-            this.arrCommon = this.megaObj.arrCommon;
-          }
+          this.strTempFromApi = await PortalApi.Get2DLayer("j", jCell);
         }
+
+        let zMin = this.dCommonZLevel; //this.getMin(this.strTempFromApi, 'zCoord');
+        //let zMin = this.getMin(this.strTempFromApi, 'zCoord');
+        let zMinLevel = zMin - 2;
+        let sallLayers = this.uniqueLayers(this.strTempFromApi);
+
+        let iCurNUm = 1;
+
+        for (let index in sallLayers) {
+          let curLayer = sallLayers[index];
+          let curCoords = this.strTempFromApi.filter(d => d.sLayerName === curLayer.sLayerName);
+          this.build2DProfOne(curCoords, zMinLevel, cType, iCurNUm, iCell, jCell);
+          iCurNUm++;
+        }
+
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async build2DProfOne_bkp(arrData, zLevel, cType, NumColor, iCell, jCell) {
+      vm = this;
+
+      let colMin = this.getMin(arrData, 'dcol');
+      let colMax = this.getMax(arrData, 'dcol');
+      let colMid = colMax - colMin;
+
+      let rowMin = this.getMin(arrData, 'drow');
+      let rowMax = this.getMax(arrData, 'drow');
+      let rowMid = rowMax - rowMin;
+
+
+      let zMin = this.dCommonZLevel; //this.getMin(arrData, 'zCoord');
+      let zMax = this.getMax(arrData, 'zCoord');
+      let zMid = zMax - zMin;
+      let scaleZKoef = -0.1; // 100 / zMid;
+      let cellSize = 2 * this.gridSize / (this.gridCount * 2);
+      let gridHalf = this.gridSize / 2;
+      //  let zOffset = (zMin - zLevel);
+      let arrLinePoints = [];
+      let oneStep = this.gridSize / arrData.length;
+
+
+      arrData.forEach(element => {
+        let sd = (zMin - element.zCoord) * scaleZKoef * 10;
+
+        if (cType === 'vert') {
+          let curVector = new THREE.Vector3(-gridHalf + cellSize * iCell - (cellSize / 2), gridHalf - oneStep * element.dcol, sd);
+          arrLinePoints.push(curVector);
+        } else {
+          let curVector = new THREE.Vector3(-gridHalf + oneStep * element.drow, gridHalf - cellSize * jCell + (cellSize / 2), sd);
+          arrLinePoints.push(curVector);
+        }
+
+      });
+      let curve = new THREE.CatmullRomCurve3(arrLinePoints);
+
+      let geometry = new THREE.TubeGeometry(curve, 10, 0.2, 8, false);
+
+      if (cType === 'vert') {
+        let tumaterial = new THREE.MeshBasicMaterial({
+          color: this.getColorHSL(NumColor * 40), //color: 0xff0000
+          //color: 0x0000ff
+        });
+      } else {
+        let tumaterial = new THREE.MeshBasicMaterial({
+          color: this.getColorHSL(NumColor * 40), //color: 0xff0000
+          //color: 0xff0000
+        });
       }
 
-      if (this.arrDrillsList.length > 0 || this.arr2DProfileList.length > 0 || this.arr3DProfileList.length > 0) {
-        this.bStorageDataEmpty = false;
-        this.dCommonZLevel = -2850;
-        this.dCommonZLevelSeism1 = -2850;
-        this.dCommonZLevelSeism2 = -2550;
+      if (cType === 'vert') {
+        let xOffset = 0;
+        let yOffset = cellSize / 2;
       } else {
-        this.bStorageDataEmpty = true;
+        let xOffset = -cellSize / 2;
+        let yOffset = 0;
+
       }
+      let zOffset = 0;
+      (zMin - zLevel);
+
+      let plane = new THREE.Mesh(geometry, tumaterial);
+
+      plane.position.set(xOffset, yOffset, zOffset);
+      this.scene.add(plane);
     },
   }
 }

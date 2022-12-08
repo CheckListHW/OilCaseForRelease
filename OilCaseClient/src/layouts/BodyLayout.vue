@@ -29,7 +29,7 @@
         </router-link>
         <router-link v-show="StoreLogged"
                      class="mainlink q-ml-lg"
-                     to="/3DScene">
+                     to="/ThreeDScene">
           3D обзор
         </router-link>
 
@@ -213,7 +213,7 @@
 </template>
 
 <script>
-import PortalApi from "src/api/OilcaseApi.js";
+import PortalApi from "src/api/OilCaseApi.js";
 import EventBus from "src/event-bus";
 import SecureLS from "secure-ls";
 import html2canvas from "html2canvas";
@@ -221,7 +221,7 @@ import {Notify} from "quasar";
 import {OutSideMixin} from "src/scriptslibs/scenescripts.js";
 import {MouseHub} from "src/api/mousehub.js";
 import Vue from "vue";
-import OilcaseApi from "src/api/OilcaseApi.js";
+import OilcaseApi from "src/api/OilCaseApi.js";
 
 export default {
   name: "MyLayout",

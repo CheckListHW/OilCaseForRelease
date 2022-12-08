@@ -526,14 +526,14 @@ import {date} from 'quasar'
 import EventBus from 'src/event-bus'
 import moment from 'moment'
 
-import OilcaseApi from "src/api/OilcaseApi.js";
+import OilcaseApi from "src/api/OilCaseApi.js";
 import {UserData} from "../api/DataForm"
 import {MapObjectOfArrangement} from "../api/MapObjectOfArrangement";
 import {Properties, ObjectsOfArrangement, DictMaps} from "src/api/Properties";
 import {Dialogs, Notifications, SpinnerOptions, UserActions} from "../data/ObjectTemplates/Dialogs";
 import {ObjectCreator} from "../data/ObjectTemplates/ObjectCreator";
 import Vue from "vue";
-import oilcaseApi from "src/api/OilcaseApi.js";
+import oilcaseApi from "src/api/OilCaseApi.js";
 import points from "echarts/src/layout/points";
 
 const width = 800
@@ -1577,7 +1577,7 @@ export default {
                 })
                 break;
               case Properties.BoreholeType.Production:
-                trajectoryPoints.push([this.toeI, this.toeJ, this.toeK])
+                trajectoryPoints.push(ObjectCreator.TrajectoryPoint(this.toeI, this.toeJ, this.toeK))
                 OilcaseApi.PostBoreholeProduction(trajectoryPoints).then(resp => {
                   this.addBorehole(resp, this.pCurPoint.icell, this.pCurPoint.jcell,
                     this.pCurPoint.name, this.modelWell, this.iCurGameStep,

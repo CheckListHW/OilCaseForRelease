@@ -42,7 +42,7 @@
 
 <script>
 
-import PortalApi from "src/api/OilcaseApi.js";
+import PortalApi from "src/api/OilCaseApi.js";
 import EventBus from 'src/event-bus';
 import {QSpinnerGrid} from 'quasar';
 import {OutSideMixin} from "src/scriptslibs/scenescripts.js";

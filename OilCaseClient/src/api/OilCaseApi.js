@@ -267,6 +267,8 @@ export default {
 
   PostBoreholeProduction: async function (trajectoryPoints) {
     console.log('[Log] PostBoreholeProduction')
+    console.log(trajectoryPoints)
+
     let points = []
     trajectoryPoints.forEach(p => {
       points.push({

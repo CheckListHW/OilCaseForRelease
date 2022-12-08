@@ -1,5 +1,5 @@
 import {Properties} from "src/api/Properties";
-import {} from "src/api/OilcaseApi";
+import {} from "src/api/OilCaseApi";
 
 
 export class MapObjectOfArrangement {

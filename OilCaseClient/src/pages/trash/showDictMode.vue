@@ -49,7 +49,7 @@
 <script>
 //https://plot.ly/javascript/contour-plots/#styling-color-bar-ticks-for-contour-plots
 //https://konvajs.github.io/docs/vue/
-import PortalApi from "src/api/OilcaseApi.js";
+import PortalApi from "src/api/OilCaseApi.js";
 import EventBus from 'src/event-bus';
 import moment from 'moment'
 import SecureLS from "secure-ls";

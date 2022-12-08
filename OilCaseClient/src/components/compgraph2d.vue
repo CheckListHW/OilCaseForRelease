@@ -5,10 +5,10 @@
 </template>
 
 <script>
-import PortalApi from "src/api/OilcaseApi.js";
+import PortalApi from "src/api/OilCaseApi.js";
 import VeLine from 'v-charts/lib/line.common'
 import SecureLS from "secure-ls";
-import OilcaseApi from "src/api/OilcaseApi.js";
+import OilcaseApi from "src/api/OilCaseApi.js";
 
 const width = 750; //window.innerWidth * 0.75; // 900;
 const height = 750; // window.innerHeight * 0.75;

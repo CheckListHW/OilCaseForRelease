@@ -208,7 +208,7 @@ import {QSpinnerGrid, QSpinnerGears} from "quasar";
 
 import EventBus from "src/event-bus";
 import store from "src/store";
-import OilcaseApi from "src/api/OilcaseApi";
+import OilcaseApi from "src/api/OilCaseApi";
 import {ObjectCreator} from "src/data/ObjectTemplates/ObjectCreator";
 import showGis from "src/components/showGis";
 import Properties from "src/api/Properties";

@@ -8,7 +8,7 @@
 
 <script>
 import EventBus from 'src/event-bus';
-import PortalApi from "src/api/OilcaseApi.js";
+import PortalApi from "src/api/OilCaseApi.js";
 
 let vm = {};
 

@@ -73,8 +73,7 @@
                       Финансовые затраты
                       <q-chip square small color="primary">{{
                           item.onGameStep > 0
-                            ? getWellMoneyAll(item.drilldeep) +
-                            sumZatrIssl(item)
+                            ? getWellMoneyAll(item.drilldeep) + sumZatrIssl(item)
                             : 0 | formatFinance
                       }}</q-chip>
 
@@ -215,7 +214,7 @@
 <script>
 //https://plot.ly/javascript/contour-plots/#styling-color-bar-ticks-for-contour-plots
 //https://konvajs.github.io/docs/vue/
-import PortalApi from "src/api/OilcaseApi.js";
+import PortalApi from "src/api/OilCaseApi.js";
 import EventBus from 'src/event-bus';
 import { OutSideMixin } from "src/scriptslibs/scenescripts.js";
 import SecureLS from "secure-ls";
@@ -372,6 +371,12 @@ export default {
       //window.alert(prop.id+" "+prop.name+" "+prop.value);
       //  PortalApi.SetDictValue(prop);
       //this.strMessage = prop.id+" "+prop.name+" "+prop.value;
+    },
+    sumZatrIssl(item) {
+      return item.selWellIssl.length * vm.mnyWellIssl1 +
+        item.selWellIssl2.length * vm.mnyWellIssl2 +
+        item.selWellIssl3.length * vm.mnyWellIssl3 +
+        item.selWellIssl4.length * vm.mnyWellIssl4
     },
 
   },

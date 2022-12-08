@@ -16,7 +16,7 @@
 
         <router-link v-show="StoreLogged" class="mainlink q-ml-lg" to="/tasks">Карта</router-link>
         <router-link v-show="StoreLogged" class="mainlink q-ml-lg" to="/result">Результаты</router-link>
-        <router-link v-show="StoreLogged" class="mainlink q-ml-lg" to="/3DScene">3D обзор</router-link>
+        <router-link v-show="StoreLogged" class="mainlink q-ml-lg" to="/ThreeDScene">3D обзор</router-link>
         <span class=" mainlink q-mx-lg">|</span>
         <router-link v-show="!StoreLogged" class=" q-ml-lg q-pl-lg" to="/LoginPage">login</router-link>
         <q-btn v-show="StoreLogged" class="q-ml-lg" flat dense @click="clickLogout()" aria-label="Menu">
@@ -44,7 +44,7 @@
 </template>
 
 <script>
-import PortalApi from "src/api/OilcaseApi.js";
+import PortalApi from "src/api/OilCaseApi.js";
 
 export default {
   name: 'MyLayout',

@@ -42,10 +42,10 @@ const routes = [
     ]
   },
   {
-    path: '/3DScene',
+    path: '/ThreeDScene',
     component: () => import('layouts/BodyLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/3DScene.vue') }
+      { path: '', component: () => import('pages/ThreeDScene.vue') }
     ]
   },
 

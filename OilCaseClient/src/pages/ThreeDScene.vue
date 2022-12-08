@@ -4,48 +4,51 @@
       <q-spinner-gears size="50px" color="primary"></q-spinner-gears>
     </q-inner-loading>
     <div class="doc-container" style="margin-top:-20px !important;width:95%">
-      <div v-show="dCommonZLevel !== 0" class="row q-pt-md">
+      <!--      <div v-show="dCommonZLevel !== 0" class="row q-pt-md">-->
+      <div class="row q-pt-md">
         <div class="col-9">
-          <q-btn class="q-mb-lg text-center" color="primary" size="sm" label="Объекты геологии" @click="clickCheck()" />
-          <q-btn class="q-mb-lg q-ml-lg" size="sm" color="teal" label="Объекты поверхности" @click="doLoadSurf()" />
+          <q-btn class="q-mb-lg text-center" color="primary" size="sm" label="Объекты геологии" @click="clickCheck()"/>
+          <q-btn class="q-mb-lg q-ml-lg" size="sm" color="teal" label="Объекты поверхности" @click="doLoadSurf()"/>
 
           <div ref="canvasContainer"></div>
         </div>
         <div class="col-3">
           <b> Отображение объектов</b>
           <div class="q-mt-md">Скважины</div>
-          <q-checkbox class="q-ml-md" v-for="item in this.arrDrillsList" :key="`${item.id}`" v-model="item.scview"
-            :label="item.name" @input="checkDrill($event)" />
+          <q-checkbox class="q-ml-md" v-for="item in this.arrDrillsList" :key="`borehole_${item.id}`"
+                      v-model="item.scview"
+                      :label="item.name" @input="checkDrill($event)"/>
 
-          <div class="q-mt-md">2D Профили</div>
-          <q-checkbox class="q-ml-md " v-for="item in this.arr2DProfileList" :key="`${item.id}`" v-model="item.scview"
-            :label="item.name" @input="checkDrill($event)" />
-          <div class="q-mt-md">3D Сейсмика</div>
-          <q-checkbox class="q-ml-md " v-for="item in this.arr3DProfileList" :key="`${item.id}`" v-model="item.scview"
-            :label="item.name" @input="checkDrill($event)" />
+          <!--          <div class="q-mt-md">2D Профили</div>-->
+          <!--          <q-checkbox class="q-ml-md " v-for="item in this.arr2DProfileList" :key="`${item.id}`" v-model="item.scview"-->
+          <!--                      :label="item.name" @input="checkDrill($event)"/>-->
+          <!--          <div class="q-mt-md">3D Сейсмика</div>-->
+          <!--          <q-checkbox class="q-ml-md " v-for="item in this.arr3DProfileList" :key="`${item.id}`" v-model="item.scview"-->
+          <!--                      :label="item.name" @input="checkDrill($event)"/>-->
           <div class="q-mt-md">Обустройство</div>
-          <q-checkbox class="q-ml-md " v-for="item in this.arrSurfObjList" :key="`${item.id}`" v-model="item.scview"
-            :label="item.stext" @input="checkDrill($event)" />
+          <q-checkbox class="q-ml-md " v-for="item in this.arrSurfObjList" :key="`object_${item.id}`"
+                      v-model="item.scview"
+                      :label="item.stext" @input="checkDrill($event)"/>
           <div v-if="arrMapList.length > 0">
             <div class="q-mt-md">Карты</div>
             <q-list dense v-for="item in this.arrMapList" :key="`${item.sKey}`">
               <q-item>
                 <q-item-main>
                   <q-radio v-model="curmap" :val="item.sImageModel" :label="item.sText"
-                    @input="doMapShowHide(item.sImageModel)" />
+                           @input="doMapShowHide(item.sImageModel)"/>
                 </q-item-main>
               </q-item>
             </q-list>
           </div>
 
-          <q-btn v-if="false" class="q-mb-lg q-ml-lg" size="sm" color="teal" label="Check" @click="do3DLoad()" />
-          <br />
+          <q-btn v-if="false" class="q-mb-lg q-ml-lg" size="sm" color="teal" label="Check" @click="do3DLoad()"/>
+          <br/>
           {{ strClickedObj }}
         </div>
       </div>
-      <div v-show="dCommonZLevel === 0" class="q-mt-lg text-center">
-        <h5>Нет данных для отображения</h5>
-      </div>
+      <!--      <div v-show="dCommonZLevel === 0" class="q-mt-lg text-center">-->
+      <!--        <h5>Нет данных для отображения</h5>-->
+      <!--      </div>-->
     </div>
   </q-page>
 </template>
@@ -55,14 +58,17 @@
 
 <script>
 import EventBus from 'src/event-bus'
-import { OutSideMixin } from 'src/scriptslibs/scenescripts.js'
+import {OutSideMixin} from 'src/scriptslibs/scenescripts.js'
+import OilCaseApi from 'src/api/OilCaseApi'
 import * as THREE from 'three'
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import spravDictions from 'assets/SpravDictions'
+import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js'
+import {ObjectsOfArrangement} from "src/api/Properties";
+import {itemPoint} from "v-charts/lib/constants";
+
 let vm = {}
 
 export default {
-  name: '3DScene',
+  name: 'ThreeDScene',
   mixins: [OutSideMixin],
   container: null,
   scene: null,
@@ -87,47 +93,104 @@ export default {
       pickableMeshes: [],
       arrMapList: [],
       megaObj: {},
-      curmap: ''
+      skipKeys: ['soRoad', 'soElLine', 'soKust', 'soTube'],
+      curmap: '',
+      dictObjects: ObjectsOfArrangement.Dict,
+      lithologicalMinZ: null,
+      lithologicalMaxZ: null,
     }
   },
   created() {
     EventBus.$on('CaseDataLoaded', todoItem => {
-      this.doLoadCaseData()
+      // this.doLoadCaseData()
     })
   },
-  mounted() {
-    this.doLoadCaseData()
-    this.arrDrillsList.forEach(el => {
-      el.scview = true
+  async mounted() {
+    // this.doLoadCaseData()
+    await OilCaseApi.GetInfo().then(resp => {
+      this.lithologicalMinZ = resp.teamInfo.lithologicalModelInfo.minZ
+      this.lithologicalMaxZ = resp.teamInfo.lithologicalModelInfo.maxZ
     })
-    this.arr2DProfileList.forEach(el => {
-      el.scview = true
+
+
+    OilCaseApi.GetBoreholeProduction().then(resp => {
+      console.log(resp)
+      resp.forEach(item => {
+        let toeIndex = item.trajectoryPoints.length > 2 ? 2 : 1
+        this.arrDrillsList.push({
+          id: item.id,
+          iCell: item.trajectoryPoints[0].x,
+          jCell: item.trajectoryPoints[0].y,
+          drilldeep: item.trajectoryPoints[1].z,
+          toeI: item.trajectoryPoints[toeIndex].x,
+          toeJ: item.trajectoryPoints[toeIndex].y,
+          toeK: item.trajectoryPoints[toeIndex].z,
+          name: item.name,
+          scview: true
+        })
+      })
+      console.log('this.arrDrillsList')
+      console.log(this.arrDrillsList)
     })
-    this.arr3DProfileList.forEach(el => {
-      el.scview = true
+
+    OilCaseApi.GetBoreholeExploration().then(resp => {
+      console.log(resp)
+      resp.forEach(item => {
+        this.arrDrillsList.push({
+          id: item.id,
+          iCell: item.trajectoryPoints[0].x,
+          jCell: item.trajectoryPoints[0].y,
+          drilldeep: item.trajectoryPoints[1].z,
+          name: item.name,
+          scview: true
+        })
+      })
+      console.log('this.arrDrillsList')
+      console.log(this.arrDrillsList)
     })
-    this.arrSurfObjList.forEach(el => {
-      el.stext = el.name + ' ' + el.description
-      el.scview = true
-    })
-    this.arrMapList = []
-    if (this.megaObj.arrCommon.buymap !== '') {
-      this.dictMapsTypes = spravDictions.dictMapsTypes
-      const maparr = this.megaObj.arrCommon.buymap.split(',')
-      if (maparr.length > 0) {
-        const df = this.dictMapsTypes.filter(x => maparr.includes(x.sKey))
-        df.forEach(item => {
-          if (item.sPref !== 'fm') {
-            this.arrMapList.push(item)
+
+    OilCaseApi.GetMapObjectOfArrangement().then(resp => {
+      console.log(resp)
+      resp.forEach(item => {
+        let dictItem = this.dictObjects[item.key]
+        this.arrSurfObjList.push({
+          id: item.id,
+          selCelliPo: item.subCellX,
+          selCelljPo: item.subCellY,
+          iCell: item.cellX,
+          jCell: item.cellY,
+          name: dictItem.sKey,
+          description: dictItem.sText,
+          scview: true,
+          stext: `${dictItem.sText}. ${item.cellX}:${item.cellY}`,
+          objModel: {
+            sModel: dictItem.sKey,
+            sKey: dictItem.sKey,
+            color: dictItem.color
           }
         })
-        this.arrMapList.push({
-          sKey: 'nomap',
-          sText: 'Без карты',
-          sImageModel: 'nomap'
-        })
-      }
-    }
+      })
+    })
+
+
+    this.arrMapList = []
+    // if (this.megaObj.arrCommon.buymap !== '') {
+    //   this.dictMapsTypes = spravDictions.dictMapsTypes
+    //   const maparr = this.megaObj.arrCommon.buymap.split(',')
+    //   if (maparr.length > 0) {
+    //     const df = this.dictMapsTypes.filter(x => maparr.includes(x.sKey))
+    //     df.forEach(item => {
+    //       if (item.sPref !== 'fm') {
+    //         this.arrMapList.push(item)
+    //       }
+    //     })
+    //     this.arrMapList.push({
+    //       sKey: 'nomap',
+    //       sText: 'Без карты',
+    //       sImageModel: 'nomap'
+    //     })
+    //   }
+    // }
 
     this.container = this.$refs.canvasContainer
     this.prepareScene()
@@ -177,15 +240,16 @@ export default {
 
       this.arrSurfObjList.forEach(el => {
         try {
-          if (el.objModel !== null && el.objModel.sModel !== null && el.objModel.sModel !== '') {
-            const strModel = el.objModel.sModel
+          console.log(el.objModel.sKey)
+          if (!this.skipKeys.includes(el.objModel.sKey)) {
+            const strModel = el.objModel.sModel.substring(2) + '.gltf'
             // console.log(strModel, el.objModel.sPref, el.objModel)
 
             const loader = new GLTFLoader()
             let gridHalf = this.gridSize / 2
 
             let step = this.gridSize / (this.gridCount * 3)
-            let xOffset = (-gridHalf ) + ((el.iCell - 1) * 3 + el.selCelliPo - 1) * step
+            let xOffset = (-gridHalf) + ((el.iCell - 1) * 3 + el.selCelliPo - 1) * step
             let yOffset = (gridHalf - step) - ((el.jCell - 1) * 3 + el.selCelljPo - 1) * step
 
             this.scalekoef = this.gridSize / 4
@@ -219,7 +283,7 @@ export default {
 
             if (el.objModel.sKey === 'soTube') {
               let geometry = new THREE.CylinderBufferGeometry(cellSizePo * 0.2, cellSizePo * 0.2, 1)
-              let material = new THREE.MeshBasicMaterial({ color: el.objModel.color })
+              let material = new THREE.MeshBasicMaterial({color: el.objModel.color})
               let cylinder = new THREE.Mesh(geometry, material)
               let sibl = this.arrSurfObjList.filter(x => x.objModel.sKey === el.objModel.sKey
                 && x.iCell === el.iCell && x.jCell === el.jCell && x.id !== el.id)
@@ -232,8 +296,9 @@ export default {
               cylinder.position.set(xOffset, yOffset, this.dSurfTop + 1)
               this.scene.add(cylinder)
             } else if (el.objModel.sKey === 'soKust') {
+              console.log('Create kust')
               let geometry = new THREE.BoxBufferGeometry(cellSizePo * 1, cellSizePo * 1, 0.2)
-              let material = new THREE.MeshBasicMaterial({ color: el.objModel.color })
+              let material = new THREE.MeshBasicMaterial({color: el.objModel.color})
               let cylinder = new THREE.Mesh(geometry, material)
               cylinder.rotation.set(0, 0, 0)
               cylinder.position.set(xOffset, yOffset, this.dSurfTop)
@@ -241,7 +306,7 @@ export default {
               this.scene.add(cylinder)
             } else if (el.objModel.sKey === 'soElLine') {
               let geometry = new THREE.CylinderBufferGeometry(cellSizePo * 0.2, cellSizePo * 0.2, 1)
-              let material = new THREE.MeshBasicMaterial({ color: el.objModel.color })
+              let material = new THREE.MeshBasicMaterial({color: el.objModel.color})
               let cylinder = new THREE.Mesh(geometry, material)
               let sibl = this.arrSurfObjList.filter(x => x.objModel.sKey === el.objModel.sKey
                 && x.iCell === el.iCell && x.jCell === el.jCell && x.id !== el.id)
@@ -250,20 +315,21 @@ export default {
                   cylinder.rotation.set(0, 0, Math.PI / 2)
                 }
               }
-
               cylinder.position.set(xOffset, yOffset, this.dSurfTop + 3)
               this.scene.add(cylinder)
+
             } else if (el.objModel.sKey === 'soRoad') {
               let geometry = new THREE.BoxBufferGeometry(cellSizePo * 1, cellSizePo * 1, 0.1)
-              let material = new THREE.MeshBasicMaterial({ color: el.objModel.color })
+              let material = new THREE.MeshBasicMaterial({color: el.objModel.color})
               let cylinder = new THREE.Mesh(geometry, material)
               cylinder.rotation.set(0, 0, 0)
               cylinder.position.set(xOffset, yOffset, this.dSurfTop)
               this.scene.add(cylinder)
+
             }
           }
         } catch (error) {
-          console.error(err)
+          console.error(error)
         }
       })
 
@@ -272,8 +338,8 @@ export default {
           const loader = new GLTFLoader()
           let gridHalf = this.gridSize / 2
           let step = this.gridSize / (this.gridCount * 3)
-          let xOffset = (-gridHalf+step) + (el.iCell - 1) * 3 * step
-          let yOffset = (gridHalf-(step*2)) - (el.jCell - 1) * 3 * step
+          let xOffset = (-gridHalf + step) + (el.iCell - 1) * 3 * step
+          let yOffset = (gridHalf - (step * 2)) - (el.jCell - 1) * 3 * step
 
 
           this.scalekoef = this.gridSize / 4
@@ -334,41 +400,28 @@ export default {
           radialSegments
         )
 
-        let tumaterial = new THREE.MeshBasicMaterial({ color: 0x0000ff })
+        let tumaterial = new THREE.MeshBasicMaterial({color: 0x0000ff})
         let plane = new THREE.Mesh(geometry, tumaterial)
         plane.position.set(105, 5, 0)
         this.scene.add(plane)
 
         this.arrDrillsList.forEach(element => {
           if (element.scview) {
-            if (element.modelWell !== null && element.modelWell === "expl") {
-              this.buildWell5(
-                element.iCell,
-                element.jCell,
-                element.idx * 20,
-                element.drilldeep,
-                element.tappedLevels,
-                element
-              )
-            } else {
-              this.buildWell(
-                element.iCell,
-                element.jCell,
-                element.idx * 20,
-                element.drilldeep,
-                element.tappedLevels
-              );
-            }
-
+            this.buildWell5(
+              element.iCell,
+              element.jCell,
+              element.idx * 20,
+              element.drilldeep,
+              element,
+              this.lithologicalMinZ,
+              this.lithologicalMaxZ,
+            )
           }
         })
 
         this.arr2DProfileList.forEach(element => {
           if (element.scview) {
             element.seismType.forEach(sel => {
-              if (sel === 'seismR') {
-                return
-              }
               this.build2DProfileSeism(
                 element.iCell,
                 element.jCell,
@@ -380,25 +433,6 @@ export default {
           }
         })
 
-        this.arr3DProfileList.forEach(element => {
-          if (element.scview) {
-            element.seismType.forEach(sel => {
-              if (sel === 'seismR') {
-                return
-              }
-              this.build3DSurf(
-                element.iCelll,
-                element.iCellr,
-                element.jCellb,
-                element.jCellt,
-                sel,
-                susername
-              )
-            })
-
-          }
-        })
-
         this.loadProc = false
       } catch (error) {
         console.log(error)
@@ -406,7 +440,7 @@ export default {
     },
 
     onMouseClick(event) {
-      let mouse = { x: 0, y: 0 }
+      let mouse = {x: 0, y: 0}
 
       mouse.x = (event.offsetX / this.container.clientWidth) * 2 - 1
       mouse.y = -(event.offsetY / this.container.clientHeight) * 2 + 1

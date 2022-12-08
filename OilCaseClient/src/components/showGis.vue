@@ -67,7 +67,7 @@
 import EventBus from 'src/event-bus';
 import store from "src/store";
 import {UserActions} from "src/data/ObjectTemplates/Dialogs";
-import OilcaseApi from "src/api/OilcaseApi.js";
+import OilcaseApi from "src/api/OilCaseApi.js";
 
 const width = window.innerWidth * 2;
 const height = window.innerHeight * 0.75;

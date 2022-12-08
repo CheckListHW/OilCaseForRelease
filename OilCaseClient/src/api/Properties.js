@@ -270,6 +270,223 @@ module.exports = {
         part: 5
       },
     ],
+    Dict: {
+      'soTube': {
+        sKey: 'soTube',
+        sZatSut: 30,
+        sZatMoney: 100,
+        sText: 'Трубопровод',
+        sPref: 't',
+        color: '#7cc783',
+        part: 2
+      },
+      'soElLine': {
+        sKey: 'soElLine',
+        sZatSut: 30,
+        sZatMoney: 100,
+        sText: 'Линия Электропередач',
+        sPref: 'le',
+        color: '#86bcde',
+        part: 2
+      },
+      'soRoad': {
+        sKey: 'soRoad',
+        sZatSut: 30,
+        sZatMoney: 100,
+        sText: 'Дорожное полотно',
+        sPref: 'r',
+        color: '#545452',
+        part: 2
+      },
+      'soKust': {
+        sKey: 'soKust',
+        sZatSut: 30,
+        sZatMoney: 100,
+        sText: 'Кустовая площадка',
+        sPref: 'kp',
+        color: '#e8d08d',
+        part: 3
+      },
+      'soGTES': {
+        sKey: 'soGTES',
+        sZatSut: 30,
+        sZatMoney: 1500,
+        sText: 'ГТЭС (Газотурбинная Электростанция)',
+        sPref: 'gtes',
+        sModel: 'GTES.gltf',
+        part: 4
+      },
+      'soAGZU': {
+        sKey: 'soAGZU',
+        sZatSut: 30,
+        sZatMoney: 1000,
+        sText: 'АГЗУ (Автоматизированная Замерная Установка)',
+        sPref: 'agzu',
+        sModel: 'AGZU.gltf',
+        part: 4
+      },
+      'soDNS': {
+        sKey: 'soDNS',
+        sZatSut: 30,
+        sZatMoney: 1400,
+        sText: 'ДНС (Дожимная Насосная Станция)',
+        sPref: 'dns',
+        sModel: 'NPS.gltf',
+        part: 4
+      },
+      'soNKS': {
+        sKey: 'soNKS',
+        sZatSut: 30,
+        sZatMoney: 1400,
+        sText: 'НКС (Насосно-Компрессорная Станция)',
+        sPref: 'nks',
+        sModel: 'NS.gltf',
+        part: 4
+      },
+      'soUPSV': {
+        sKey: 'soUPSV',
+        sZatSut: 30,
+        sZatMoney: 2200,
+        sText: 'Мини УПСВ (Установка Предварительного Сброса Воды)',
+        sPref: 'upsv',
+        sModel: 'UPSV.gltf',
+        part: 4
+      },
+      'soSEP2f': {
+        sKey: 'soSEP2f',
+        sZatSut: 30,
+        sZatMoney: 1800,
+        sText: 'Сепаратор 2х фазный',
+        sPref: 'sep2f',
+        sModel: 'SEPAR2ph.gltf',
+        part: 4
+      },
+      'soSEP3f': {
+        sKey: 'soSEP3f',
+        sZatSut: 30,
+        sZatMoney: 2200,
+        sText: 'Сепаратор 3х фазный',
+        sPref: 'sep3f',
+        sModel: 'SEPAR3ph.gltf',
+        part: 4
+      },
+      'soUPN': {
+        sKey: 'soUPN',
+        sZatSut: 30,
+        sZatMoney: 3500,
+        sText: 'Мини УПН (Установка Подготовки Нефти)',
+        sPref: 'upn',
+        sModel: 'UPN.gltf',
+        part: 4
+      },
+      'soUKPG': {
+        sKey: 'soUKPG',
+        sZatSut: 30,
+        sZatMoney: 3500,
+        sText: 'Мини УКПГ (Установка Комплексной Подготовки Газа)',
+        sPref: 'ukpg',
+        sModel: 'UKPG.gltf',
+        part: 4
+      },
+      'soCPS': {
+        sKey: 'soCPS',
+        sZatSut: 30,
+        sZatMoney: 2000,
+        sText: 'Мини ЦПС (Центральный Пункт Сбора)',
+        sPref: 'cps',
+        sModel: 'CPS.gltf',
+        part: 4
+      },
+      'soNPZ': {
+        sKey: 'soNPZ',
+        sZatSut: 30,
+        sZatMoney: 5000,
+        sText: 'Мини НПЗ (Нефтеперерабатывающий Завод)',
+        sPref: 'npz',
+        sModel: 'NPZ.gltf',
+        part: 4
+      },
+      'soGPZ': {
+        sKey: 'soGPZ',
+        sZatSut: 30,
+        sZatMoney: 5000,
+        sText: 'Мини ГПЗ (Газоперерабатывающий Завод)',
+        sPref: 'gpz',
+        sModel: 'GPZ.gltf',
+        part: 4
+      },
+      'soUPV': {
+        sKey: 'soUPV',
+        sZatSut: 30,
+        sZatMoney: 2200,
+        sText: 'Мини УПВ (Установка Подготовки Пластовой Воды)',
+        sPref: 'upv',
+        sModel: 'UPV.gltf',
+        part: 4
+      },
+      'soFakel': {
+        sKey: 'soFakel',
+        sZatSut: 30,
+        sZatMoney: 500,
+        sText: 'Факел',
+        sPref: 'fakel',
+        sModel: 'FAKEL.gltf',
+        part: 5
+      },
+      'soTO': {
+        sKey: 'soTO',
+        sZatSut: 30,
+        sZatMoney: 3000,
+        sText: 'Мини Терминал отгрузки',
+        sPref: 'to',
+        sModel: 'Terminal.gltf',
+        part: 5
+      },
+      'soFPSO': {
+        sKey: 'soFPSO',
+        sZatSut: 30,
+        sZatMoney: 4000,
+        sText: 'FPSO (Floating Production Storage and Offloading)',
+        sPref: 'fpso',
+        sModel: 'FPSO.gltf',
+        part: 5
+      },
+      'soTanker': {
+        sKey: 'soTanker',
+        sZatSut: 30,
+        sZatMoney: 3000,
+        sText: 'Мини танкер',
+        sPref: 'tanker',
+        sModel: 'Tanker.gltf',
+        part: 5
+      },
+      'soHelic': {
+        sKey: 'soHelic',
+        sZatSut: 30,
+        sZatMoney: 1200,
+        sText: 'Вертолетная площадка',
+        sPref: 'helic',
+        part: 5
+      },
+      'soLM': {
+        sKey: 'soLM',
+        sZatSut: 30,
+        sZatMoney: 1200,
+        sText: 'Жилой блок',
+        sPref: 'lm',
+        sModel: 'House.gltf',
+        part: 5
+      },
+      'soTU': {
+        sKey: 'soTU',
+        sZatSut: 30,
+        sZatMoney: 1200,
+        sText: 'Транспортный цех',
+        sPref: 'tu',
+        sModel: 'TD.gltf',
+        part: 5
+      },
+    },
   },
   DictMaps: [
     {
