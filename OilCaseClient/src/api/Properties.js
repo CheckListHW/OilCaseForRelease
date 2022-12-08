@@ -23,10 +23,10 @@ const BoreholeType = {
 }
 
 const PurchaseType = {
-    Well: "Well",
-    HorizontalSeismic: "HorizontalSeismic",
-    VerticalSeismic: "VerticalSeismic",
-    ObjectOfArrangement: "ObjectOfArrangement",
+  Well: "Well",
+  HorizontalSeismic: "HorizontalSeismic",
+  VerticalSeismic: "VerticalSeismic",
+  ObjectOfArrangement: "ObjectOfArrangement",
 }
 
 
@@ -52,7 +52,7 @@ module.exports = {
     BoreholeStatus: BoreholeStatus,
     PurchaseType: PurchaseType
   },
-  ObjectsOfArrangement:{
+  ObjectsOfArrangement: {
     Objects: [
       {
         sKey: 'soTube',
@@ -269,6 +269,109 @@ module.exports = {
         sModel: 'TD.gltf',
         part: 5
       },
-    ]
-  }
+    ],
+  },
+  DictMaps: [
+    {
+      sKey: 'rm',
+      sZatSut: 30,
+      sZatMoney: 500,
+      sText: 'Рельеф местности',
+      sPref: 'm',
+      part: 'map1',
+      sImageModel: 'map1.png',
+      mode: 0,
+      status: 0,
+    },
+    {
+      sKey: 'cv',
+      sZatSut: 30,
+      sZatMoney: 750,
+      sText: 'Общий обзор местности',
+      sPref: 'm',
+      part: 'map2',
+      sImageModel: 'map2.png',
+      mode: 0,
+      status: 0,
+
+    },
+    {
+      sKey: 'gd',
+      sZatSut: 30,
+      sZatMoney: 1000,
+      sText: 'Прочность грунта',
+      sPref: 'm',
+      part: 'map3',
+      sImageModel: 'map3.png',
+      mode: 0,
+      status: 0,
+
+    },
+    {
+      sKey: 'bd',
+      sZatSut: 30,
+      sZatMoney: 1000,
+      sText: 'Карта усложнений строительства',
+      sPref: 'm',
+      part: 'map4',
+      sImageModel: 'map4.png',
+      mode: 0,
+      status: 0,
+    },
+    {
+      sKey: 'gmg',
+      sZatSut: 30,
+      sZatMoney: 1000,
+      sText: 'Гравиметрическая/ магнитная/геохимическая съемка',
+      sPref: 'm',
+      part: 'map5',
+      sImageModel: 'map5.png',
+      mode: 0,
+      status: 0,
+    },
+    {
+      sKey: 'fmap1',
+      sZatSut: 0,
+      sZatMoney: 20000,
+      sText: 'Право пользования лицензионным участком А на 10 лет',
+      sPref: 'fm',
+      part: 'fmap1',
+      sImageModel: '',
+      mode: 0,
+      status: 0,
+    },
+    {
+      sKey: 'fmap2',
+      sZatSut: 0,
+      sZatMoney: 10000,
+      sText: 'Право пользования лицензионным участком Б на 10 лет',
+      sPref: 'fm',
+      part: 'fmap2',
+      sImageModel: '',
+      mode: 0,
+      status: 0,
+    },
+    {
+      sKey: 'fmap3',
+      sZatSut: 0,
+      sZatMoney: 10000,
+      sText: 'Право пользования лицензионным участком В на 10 лет',
+      sPref: 'fm',
+      part: 'fmap3',
+      sImageModel: '',
+      mode: 0,
+      status: 0,
+    },
+    {
+      sKey: 'fmap4',
+      sZatSut: 0,
+      sZatMoney: 25000,
+      sText: 'Право пользования лицензионным участком Г на 10 лет',
+      sPref: 'fm',
+      part: 'fmap4',
+      sImageModel: '',
+      mode: 0,
+      status: 0,
+    },
+  ]
 };

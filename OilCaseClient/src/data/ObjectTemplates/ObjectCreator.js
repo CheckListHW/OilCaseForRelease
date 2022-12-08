@@ -94,8 +94,8 @@ export class ObjectCreator {
                              drawSubCellX, drawSubCellY,
                              width, height,
                              endDate, objectOfArrangement) {
-    let objectTipText = objectOfArrangement.sPref === 'kp' ? 'K' + id
-      : (objectOfArrangement.part !== 2 ? 's' + id : '')
+    let objectTipText = objectOfArrangement.sPref === 'kp' ? `K${cellX}-${cellY}`
+      : (objectOfArrangement.part !== 2 ? `s${cellX}-${cellY}` : '')
 
     let newObjectOfArrangement = {
       idx: id,

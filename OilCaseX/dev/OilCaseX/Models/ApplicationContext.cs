@@ -27,6 +27,7 @@ public class ApplicationContext : IdentityDbContext<User, IdentityRole, string>
     public virtual DbSet<PurchasedObjectOfArrangement> PurchasedObject { get; set; }
     public virtual DbSet<PurchasedSeismic> PurchasedSeismic { get; set; }
     public virtual DbSet<PurchasedLogName> PurchasedLogName { get; set; }
+    public virtual DbSet<PurchasedMap> PurchasedMaps{ get; set; }
     public virtual DbSet<WellTop> WellTops{ get; set; }
 
 

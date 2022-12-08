@@ -186,7 +186,7 @@
                       <!--                      </div>-->
                     </div>
                     <compgraph2d v-if=" sit === 'seismR'"
-                                 :seismic = "item"
+                                 :seismic="item"
                                  :chartInp="{ iCell: item.iCell, jCell: item.jCell, profType: item.profType, seismType: sit }"
                                  :chartSettings="comp2dchrtSettings"/>
                   </div>
@@ -272,6 +272,8 @@ export default {
 
   created() {
     OilcaseApi.GetBoreholeLog().then(resp => {
+      console.log('OilcaseApi.GetBoreholeLog()')
+      console.log(resp)
       this.boreholes = resp
     })
 
@@ -292,7 +294,6 @@ export default {
         item.seismType = ['seismR']
         this.seismic.push(item)
       })
-      console.log(this.seismic)
     })
   },
 

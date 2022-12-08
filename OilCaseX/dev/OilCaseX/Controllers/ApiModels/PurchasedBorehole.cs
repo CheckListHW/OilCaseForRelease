@@ -35,7 +35,7 @@ public class PurchasedBoreholeGet : PurchasedBorehole
 
 public class PurchasedBoreholeExplorationGet : PurchasedBoreholeGet
 {
-    public List<LogName> LogNames { get; set; }
+    public List<PurchasedLogName> LogNames { get; set; }
 }
 
 public class PurchasedBoreholeProductionGet : PurchasedBoreholeGet

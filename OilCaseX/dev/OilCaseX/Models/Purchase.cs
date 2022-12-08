@@ -137,3 +137,12 @@ public class PurchasedLogName
     public int LogNameId { get; set; }
     public LogName LogName { get; set; }
 }
+
+public class PurchasedMap : IPurchased
+{
+    public int Id { get; set; }
+    public int TeamId { get; set; }
+    public Team? Team { get; set; }
+    public int GameStep { get; set; }
+    public string Name { get; set; }
+}

@@ -139,7 +139,8 @@ export default {
     EventBus.$on('doOpenWellLevels', item => {
       if (this.boreholeName === item.name) {
         let gisData = new Map()
-        item.gis.forEach(item => {
+        console.log(item)
+        item.boreholeLog.forEach(item => {
           gisData.set(item.name, {
             'values': item.values,
             'positions': item.positions

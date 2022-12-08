@@ -6,18 +6,18 @@
         <h4 style="margin-top:-10px">
           Текущий ход: {{ iCurGameStep }}
           <q-btn rounded class="q-mx-lg" size="lg" no-caps color="indigo-9" label="Завершить ход" v-show="isCaptain"
-                 :disable="!bAllowNextStep" @click="bNextStep = true">
-            <q-tooltip v-show="!bAllowNextStep">Временная блокировка действий</q-tooltip>
+                 :disable="Boolean(!bAllowNextStepDay & !bAllowNextStepDay)" @click="bNextStep = true">
+            <q-tooltip v-show="Boolean(!bAllowNextStepDay & !bAllowNextStepDay)">Временная блокировка действий
+            </q-tooltip>
           </q-btn>
           <span class="q-ml-lg text-deep-orange-6" style="font-size:12pt" v-show="!isCaptain">
             Ход завершается капитаном.
           </span>
         </h4>
         <span class="q-ml-md text-red" v-if="strNextErr !== ''">{{ strNextErr }}</span>
-        <div v-if="bDictFlag">
+        <div>
           Общие затраты: финансовые
-          <b class="text-primary"> {{ totalCostMoney | formatFinance }} </b>
-          из {{ mnyAllMax | formatFinance }}
+          <b class="text-primary"> {{ totalCostMoney | formatFinance }} </b> из {{ mnyAllMax | formatFinance }}
           <div v-if="false" class="q-mx-md" style="width:60px; background: #ff5566">
             check color
           </div>
@@ -30,10 +30,10 @@
         <div class="row q-mt-lg">
           <div class="col-6">
             <q-btn-toggle class="q-mb-md float-left" size="md" v-model="bsCellMode" toggle-color="primary" :options="[
+              { label: 'Обустройство', value: purchaseType.ObjectOfArrangement },
               { label: 'Скважины', value: purchaseType.Well },
               { label: '2D (Север-Юг)', value: purchaseType.VerticalSeismic },
-              { label: '2D (Запад-Восток)', value: purchaseType.HorizontalSeismic },
-              { label: 'Обустройство', value: purchaseType.ObjectOfArrangement }
+              { label: '2D (Запад-Восток)', value: purchaseType.HorizontalSeismic }
             ]"/>
             <q-btn class="q-mb-md float-left" @click="bactionSheet = true" icon="settings">
               <q-tooltip> Настройка отображение карты</q-tooltip>
@@ -152,7 +152,6 @@
               <div class="row">
                 <div class="col-10">
                   {{ item.name }} ячейка i {{ item.iCell }} j {{ item.jCell }}
-
                   <span class="q-ml-md" v-if="item.addedDate !== undefined">{{ item.addedDate | dateDate }}</span>
                   <div v-if="item.modelWell === wellType.Production">
                     Эксплуатационная {{ item.wellstatusText }}
@@ -185,13 +184,7 @@
                       +
                     </span>
                     исследования:
-                    <b>{{
-                        (selWellIssl.length * mnyWellIssl1 +
-                          selWellIssl2.length * mnyWellIssl2 +
-                          selWellIssl3.length * mnyWellIssl3 +
-                          selWellIssl4.length * mnyWellIssl4)
-                          | formatFinance
-                      }}</b>
+                    <b>{{ getCostMoneyResearch(item) | formatFinance }}</b>
 
                     <br/>Временные затраты
                     <q-chip square small color="secondary">{{
@@ -206,14 +199,15 @@
                       суток + дополнительные:
                       <b>{{ getWellDayDrill(calcDrillDeep(getDrillPoints(), modelWell)) | formatSut }}</b>
                       + 1</span>
-                    исследования: <b>{{ (item.researches.length * sutWellIssl) | formatSut }}</b>
+                    исследования: <b>{{ getCostDayResearch(item) | formatSut }}</b>
                   </p>
 
                 </div>
                 <div class="col-2">
                   <div class="row gutter-md">
                     <div class="col-10">
-                      <q-btn v-if="item.modelWell === wellType.Exploration" class="float-right  q-mr-md" color="indigo"
+                      <q-btn v-if="item.modelWell === wellType.Exploration"
+                             class="float-right  q-mr-md" color="indigo"
                              outline icon="line_style" @click.prevent="addIssl2Well(item)"
                              v-show="item.onGameStep === iCurGameStep">
                         <q-tooltip>добавление исследований</q-tooltip>
@@ -535,11 +529,12 @@ import moment from 'moment'
 import OilcaseApi from "src/api/OilcaseApi.js";
 import {UserData} from "../api/DataForm"
 import {MapObjectOfArrangement} from "../api/MapObjectOfArrangement";
-import {Properties, ObjectsOfArrangement} from "src/api/Properties";
+import {Properties, ObjectsOfArrangement, DictMaps} from "src/api/Properties";
 import {Dialogs, Notifications, SpinnerOptions, UserActions} from "../data/ObjectTemplates/Dialogs";
 import {ObjectCreator} from "../data/ObjectTemplates/ObjectCreator";
 import Vue from "vue";
 import oilcaseApi from "src/api/OilcaseApi.js";
+import points from "echarts/src/layout/points";
 
 const width = 800
 const height = 800
@@ -571,7 +566,7 @@ export default {
       endDate: Properties.EndDate,
 
       modelWell: Properties.BoreholeType.Exploration,
-      bsCellMode: Properties.PurchaseType.Well,
+      bsCellMode: Properties.PurchaseType.ObjectOfArrangement,
       checkValueSelectedAllResearch: false,
       if3DListLength: true,
 
@@ -611,7 +606,8 @@ export default {
       iCurGameStep: 1,
       seismType: "",
       strNextErr: '',
-      bAllowNextStep: true,
+      bAllowNextStepDay: true,
+      bAllowNextStepMoney: true,
       arrDictParams: [],
       bPOTooltip: false,
 
@@ -674,7 +670,7 @@ export default {
       drawPointCell: [],
       arrDisableArea: [],
       dictSurfObjects: [],
-      dictMapsTypes: [],
+      dictMapsTypes: DictMaps,
       dictWellMethodTypes: [],
       megaObj: {},
 
@@ -723,13 +719,17 @@ export default {
     this.testImg5.src = 'statics/Map5.png'
   },
 
-  created() {
+  async created() {
     console.log("Token", Vue.cookie.get('oilcase_cookie'))
     this.drawMap()
 
-    OilcaseApi.GetInfo().then(resp => {
-      console.log(resp)
+    await OilcaseApi.GetInfo().then(resp => {
       this.iCurGameStep = resp.teamInfo.gameStep
+    })
+
+    await OilcaseApi.GetTypesOfResearch().then(resp => {
+      this.typesOfResearches = new Map(resp.map(item => [item.name, item]))
+      console.log(this.typesOfResearches)
     })
 
     OilcaseApi.GetMapObjectOfArrangement().then(resp => {
@@ -757,7 +757,7 @@ export default {
         let drillDeep = item.trajectoryPoints[1].z
         let name = item.name
 
-        let modelWell = item.boreholeType
+        let modelWell = Properties.BoreholeType.Exploration
         let gameStep = item.gameStep
         let toeI, toeK, toeJ
 
@@ -767,29 +767,19 @@ export default {
           toeJ = item.trajectoryPoints[2].z
         }
 
-        this.addBorehole(item.id, CellX, CellY, name,
+        let borehole = this.addBorehole(item.id, CellX, CellY, name,
           modelWell, gameStep, drillDeep, toeI, toeJ, toeK)
+        this.addResearch(item.logNames, borehole)
       })
-      console.log(this.arrDrillsList)
-
-      // OilcaseApi.GetTypesOfResearch().then(resp => {
-      //   this.typesOfResearches = new Map(resp.map(item => [item.name, item]))
-      //
-      //   OilcaseApi.GetBoreholeResearch().then(resp => {
-      //     resp.forEach(item => {
-      //       let borehole = this.arrDrillsList.find(borehole => borehole.iCell === item.cellX & borehole.jCell === item.cellY)
-      //       this.addResearch(item.logNames.map(item => this.typesOfResearches.get(item)), borehole)
-      //     })
-      //   })
-      // })
     })
+
     OilcaseApi.GetBoreholeProduction().then(resp => {
       resp.forEach(item => {
         let CellX = item.trajectoryPoints[0].x
         let CellY = item.trajectoryPoints[0].y
         let drillDeep = item.trajectoryPoints[1].z
         let name = item.name
-        let modelWell = item.boreholeType
+        let modelWell = Properties.BoreholeType.Production
         let gameStep = item.gameStep
         let toeI, toeK, toeJ
 
@@ -805,18 +795,15 @@ export default {
           drillDeep,
           toeI, toeJ, toeK, item.statusId)
       })
-
-      // OilcaseApi.GetTypesOfResearch().then(resp => {
-      //   this.typesOfResearches = new Map(resp.map(item => [item.name, item]))
-      //
-      //   OilcaseApi.GetBoreholeResearch().then(resp => {
-      //     resp.forEach(item => {
-      //       let borehole = this.arrDrillsList.find(borehole => borehole.iCell === item.cellX & borehole.jCell === item.cellY)
-      //       this.addResearch(item.logNames.map(item => this.typesOfResearches.get(item)), borehole)
-      //     })
-      //   })
-      // })
     })
+
+    OilcaseApi.GetMaps().then(resp => {
+      resp.forEach(item => {
+        this.addMap(item.id, item.name)
+      })
+    })
+
+
   },
 
   beforeDestroy() {
@@ -894,47 +881,37 @@ export default {
       var wellCo = 0
 
       this.arrDrillsList.forEach(item => {
-        var itemDrilldeep = this.calcDrillDeep([[item.iCell, item.jCell, 0],
-          [item.iCell, item.jCell, item.drilldeep],
-          [item.toeI, item.toeJ, item.toeK]], item.modelWell)
-
-        if (item.onGameStep > 0) {
-          wellCo += this.getWellMoneyDrillAll(itemDrilldeep) + this.sumZatrIssl(item)
+        let points = [[item.iCell, item.jCell, 0],
+          [item.iCell, item.jCell, item.drilldeep]]
+        if (item.toeI !== undefined && item.toeJ !== undefined && item.toeK !== undefined) {
+          points.push([item.toeI, item.toeJ, item.toeK])
         } else {
-          wellCo += item.researches.filter(x => x.isslType !== 'gisParam10').length * vm.mnyWellIssl
-          wellCo += item.researches.filter(x => x.isslType === 'gisParam10').length * vm.mnyWellKernFoto
+          points.push([item.iCell, item.jCell, item.drilldeep])
         }
+        var itemDrilldeep = this.calcDrillDeep(points, item.modelWell)
+
+        wellCo += this.getWellMoneyDrillAll(itemDrilldeep) + this.getCostMoneyResearch(item)
       })
 
-      var prof2DCo = 0
-      this.arr2DProfileList.filter(i => Array.isArray(i)).forEach(item => {
-        item.seismType.forEach(el => {
-          prof2DCo += Properties.SeismicCost[el]
-        })
-      })
-
-      var prof3DCo = 0
-      this.arr3DProfileList.filter(i => Array.isArray(i)).forEach(item => {
-        item.seismType.forEach(el => {
-          prof3DCo += Properties.SeismicCost[el]
-        })
-      })
+      var prof2DCo = Properties.SeismicCost['seismM'] * this.arr2DProfileList.length
 
       var sumSurf = this.arrSurfObjList.reduce((pSum, a) => pSum + a.objModel.sZatMoney, 0);
       var sumMaps = this.arrMapList.reduce((pSum, a) => pSum + a.sZatMoney, 0);
-      var totalCost = wellCo + prof2DCo + prof3DCo + sumSurf + sumMaps
+      var totalCost = wellCo + prof2DCo + sumSurf + sumMaps
 
       if (totalCost > this.mnyAllMax) {
-        this.$q.notify({
-          color: 'negative',
-          icon: 'warning',
-          message: 'Внимание! У вас закончились деньги. Попробуйте сократить количество работ',
-          position: 'top',
-          timeout: 5000 + 3000
-        })
-        this.bAllowNextStep = false
+        if (this.bAllowNextStepMoney === true) {
+          this.bAllowNextStepMoney = false
+          this.$q.notify({
+            color: 'negative',
+            icon: 'warning',
+            message: 'Внимание! У вас закончились деньги. Попробуйте сократить количество работ',
+            position: 'top',
+            timeout: 5000 + 3000
+          })
+        }
       } else {
-        this.bAllowNextStep = true
+        this.bAllowNextStepMoney = true
       }
       return totalCost
     },
@@ -945,44 +922,52 @@ export default {
       var wellSut = 0
 
       this.arrDrillsList.forEach(item => {
-        var itemDrilldeep = this.calcDrillDeep([[item.iCell, item.jCell, 0],
-          [item.iCell, item.jCell, item.drilldeep],
-          [item.toeI, item.toeJ, item.toeK]], item.modelWell)
-
-        if (item.onGameStep > 0) {
-          wellSut += this.getWellDayDrillAll(itemDrilldeep) + item.researches.length * vm.sutWellIssl
+        let points = [[item.iCell, item.jCell, 0],
+          [item.iCell, item.jCell, item.drilldeep]]
+        if (item.toeI !== undefined && item.toeJ !== undefined && item.toeK !== undefined) {
+          points.push([item.toeI, item.toeJ, item.toeK])
         } else {
-          wellSut = wellSut + item.researches.length * vm.sutWellIssl
+          points.push([item.iCell, item.jCell, item.drilldeep])
         }
+        var itemDrilldeep = this.calcDrillDeep(points, item.modelWell)
+        wellSut += this.getWellDayDrillAll(itemDrilldeep) + this.getCostDayResearch(item)
+
       })
       var povobSut = 0
       this.arrSurfObjList.forEach(item => {
-        if (item.onGameStep > 0) {
-          povobSut = povobSut + item.objModel.sZatSut;
-        } else {
-          povobSut = povobSut + item.objModel.sZatSut;
-        }
+        povobSut += item.objModel.sZatSut;
       })
 
-      var prof2DSut = this.arr2DProfileList.length > 0 ? this.sut2D : 0
-      var prof3DSut = this.arr3DProfileList.length > 0 ? this.sut3D : 0
-      sutItog = prof3DSut > prof2DSut ? prof3DSut : prof2DSut
-      sutItog = wellSut > sutItog ? wellSut : sutItog
 
-      sutItog = sutItog + povobSut
+      let steps = []
+      this.arr2DProfileList.forEach(item => {
+        steps.push(item.onGameStep)
+      })
+
+      let uniqueSteps = new Set(steps)
+      var prof2DSut = uniqueSteps.size * this.sut2D
+
+      let costMaps = 0
+      this.arrMapList.forEach(map => {
+        costMaps += map.sZatSut
+      })
+
+      sutItog = prof2DSut + povobSut + wellSut + costMaps
 
       if (sutItog > this.sutAllMax) {
-        this.$q.notify({
-          color: 'negative',
-          icon: 'warning',
-          message:
-            'Внимание! Работы и исследования не будут закончены в срок. Попробуйте сократить их количество',
-          position: 'top',
-          timeout: 5000 + 3000
-        })
-        this.bAllowNextStep = false
+        if (this.bAllowNextStepDay === true) {
+          this.bAllowNextStepDay = false
+          this.$q.notify({
+            color: 'negative',
+            icon: 'warning',
+            message:
+              'Внимание! Работы и исследования не будут закончены в срок. Попробуйте сократить их количество',
+            position: 'top',
+            timeout: 5000 + 3000
+          })
+        }
       } else {
-        this.bAllowNextStep = true
+        this.bAllowNextStepDay = true
       }
       vm.endDate = addToDate(vm.startDate, {days: sutItog});
       return sutItog
@@ -1061,6 +1046,14 @@ export default {
 
     getSeismicTypeMoney(typeSeismic) {
       return Properties.SeismicCost[typeSeismic]
+    },
+
+    getCostDayResearch(borehole) {
+      return borehole.researches.reduce((sum, i) => sum + parseFloat(this.typesOfResearches.get(i.name).costDay), 0)
+    },
+
+    getCostMoneyResearch(borehole) {
+      return borehole.researches.reduce((sum, i) => sum + parseFloat(this.typesOfResearches.get(i.name).costMoney), 0)
     },
 
     drawSubCellMap(objectId, key, cellX, cellY, subCellX, subCellY, gameStep) {
@@ -1172,25 +1165,36 @@ export default {
       return this.getWellDayDrill(deep) + this.sutWellBase
     },
 
+    addMap(id, mapName) {
+      let data = [mapName]
+      this.dictMapsTypes.filter(x => data.includes(x.sKey)).forEach(item => {
+        item["status"] = 1
+        item['idx'] = id
+        this.arrMapList.push(item)
+        if (item.sPref !== 'fm') {
+          this.actionsSheetItems.push(ObjectCreator.SheetItemON(item.sText, () => {
+            this.toggleMap(item.sKey)
+          }))
+        }
+
+        if (this.actionsSheetItems.filter(x => x.type === 'mapoff').length === 0) {
+          this.actionsSheetItems.push(ObjectCreator.SheetItemOff(() => {
+            this.toggleMap('off')
+          }))
+        }
+      })
+    },
+
     doBuyMap() {
       this.$q
         .dialog(Dialogs.BuyMap(this.getMapsObjects))
         .then(data => {
-          this.dictMapsTypes.filter(x => data.includes(x.sKey)).forEach(item => {
-            item["status"] = 1
-            this.arrMapList.push(item)
-            if (item.sPref !== 'fm') {
-              this.actionsSheetItems.push(ObjectCreator.SheetItemON(item.sText, () => {
-                this.toggleMap(item.sKey)
-              }))
-            }
-
-            if (this.actionsSheetItems.filter(x => x.type === 'mapoff').length === 0) {
-              this.actionsSheetItems.push(ObjectCreator.SheetItemOff(() => {
-                this.toggleMap('off')
-              }))
-            }
+          data.forEach(item => {
+            OilcaseApi.PostMaps(item).then(resp => {
+              this.addMap(resp, item)
+            })
           })
+
         }).catch((e) => {
         console.log(e)
       })
@@ -1212,9 +1216,6 @@ export default {
         this.sImageMode = 'off'
       } else {
         const curmap = this.arrMapList.find(x => x.sKey === mapKey)
-        if (curmap['status'] !== 2) {
-          return
-        }
         this.sImageMode = curmap.part
       }
     },
@@ -1293,7 +1294,9 @@ export default {
       this.selIssl1Interval.min = item.drilldeep
       this.selIssl1Interval.max = this.minDrillDeep
       this.drillDeep = item.drilldeep
-
+      console.log(item)
+      this.pCurPoint.icell = item.iCell
+      this.pCurPoint.jcell = item.jCell
 
       this.selWellIssl3 = item.selWellIssl3
       this.bAllIssl = item.researches.length === 9
@@ -1411,9 +1414,9 @@ export default {
             return
           }
 
-
           OilcaseApi.PostMapObjectOfArrangement(data, this.pCurPoint.icell, this.pCurPoint.jcell,
             this.subCellX, this.subCellY).then(resp => {
+            console.log()
             this.drawSubCellMap(resp, data, this.pCurPoint.icell, this.pCurPoint.jcell,
               this.subCellX, this.subCellY, this.iCurGameStep)
 
@@ -1588,6 +1591,9 @@ export default {
             let borehole = this.arrDrillsList.filter(item => {
               return item.jCell === CellX & item.jCell === CellY
             })[0]
+            console.log(CellX, CellY)
+            console.log(this.arrDrillsList)
+            console.log(borehole)
             OilcaseApi.PatchBoreholeExploration(borehole.idx, Array.from(this.selectedResearches, x => x.name))
             this.addResearch(this.selectedResearches, this.drCurSelWell)
             this.addUserActionToLogAsync(UserActions.AddResearches(this.selectedResearches, CellX, CellY))
@@ -1601,13 +1607,15 @@ export default {
         })
     },
 
-    addBorehole(boreholeId, CellX, CellY, name, modelWell, drillDeep, gameStep, toeI, toeJ, toeK, boreholeStatus) {
-      this.arrDrillsList.push(ObjectCreator.Borehole(
+    addBorehole(boreholeId, CellX, CellY, name, modelWell, gameStep, drillDeep, toeI, toeJ, toeK, boreholeStatus) {
+      let borehole = ObjectCreator.Borehole(
         boreholeId, this.getXForDraw(CellX), this.getYForDraw(CellY),
         CellX, CellY,
         name, gameStep,
         this.drillDeep, modelWell,
-        toeI, toeJ, toeK, boreholeStatus))
+        toeI, toeJ, toeK, boreholeStatus)
+      this.arrDrillsList.push(borehole)
+      return borehole
     },
 
     addResearch(arrayOfResearch, borehole) {
@@ -1615,9 +1623,9 @@ export default {
       arrayOfResearch.forEach(item => {
         borehole.researches.push({
           name: item.name,
-          key: `${item.name}-${this.drCurSelWell.idx}`,
-          text: `${item.name}-${item.description}`,
-          onGameStep: parseInt(this.iCurGameStep) + 1
+          key: `${item.name}-${borehole.idx}`,
+          text: `${item.name}-${this.typesOfResearches.get(item.name).description}`,
+          onGameStep: parseInt(borehole.onGameStep)
         })
       })
     },

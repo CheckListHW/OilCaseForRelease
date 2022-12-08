@@ -89,7 +89,7 @@ namespace OilCaseApi.Controllers.Api.Purchased
             var boreholes = _context.PurchasedBoreholes
                 .Include(pb => pb.TrajectoryPoints)
                 .Where(pb => pb.TeamId == team.Id & pb.IsProduction == false)
-                .Select(pb => new ApiModels.PurchasedBoreholeGet()
+                .Select(pb => new ApiModels.PurchasedBoreholeExplorationGet()
                 {
                     Id = pb.Id,
                     Name = pb.Name,
@@ -100,7 +100,12 @@ namespace OilCaseApi.Controllers.Api.Purchased
                             X = p.CellX,
                             Y = p.CellY,
                             Z = p.CellZ,
-                        }).ToList()
+                        }).ToList(),
+                    LogNames = pb.PurchasedLogNames.Select(pln => new ApiModels.PurchasedLogName()
+                    {
+                        Name = pln.LogName.Name,
+                    }).ToList()
+                    
                 });
 
             return Ok(boreholes);
