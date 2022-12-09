@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -98,13 +99,14 @@ namespace OilCaseApi.Controllers.Api.Purchased
             var boreholes = _context.PurchasedBoreholes
                 .Include(pb => pb.TrajectoryPoints)
                 .Include(pb => pb.BoreholeStatusHistories)
+                    .ThenInclude(psh => psh.BoreholeStatus)
                 .Where(pb => pb.IsProduction == true & pb.TeamId == team.Id)
                 .Select(pb => new ApiModels.PurchasedBoreholeProductionGet()
                 {
                     Id = pb.Id,
                     Name = pb.Name,
                     GameStep = pb.GameStep,
-                    BoreholeStatusId = pb.BoreholeStatusHistories.Max(bsh => bsh.GameStep),
+                    BoreholeStatusKey = pb.BoreholeStatusHistories.OrderBy(bsh => bsh.GameStep).First().BoreholeStatus.Key,
                     TrajectoryPoints = pb.TrajectoryPoints.Select(p =>
                         new ApiModels.TrajectoryPoint()
                         {
@@ -128,30 +130,30 @@ namespace OilCaseApi.Controllers.Api.Purchased
             DbModels.Team? team = GetUser(User.Claims.FirstOrDefault().Value)?.Team;
             if (team == null) return Unauthorized();
 
-            var pb = _context.PurchasedBoreholes.Find(valuePatch.Id);
+            var pb = _context.PurchasedBoreholes.Find(valuePatch.BoreholeId);
             if (pb == null) return NotFound();
 
             if (pb.TeamId != team.Id) return NotFound();
 
-            var boreholeStatus = _context.BoreholeStatus.Find(valuePatch.StatusId);
+            var boreholeStatus = _context.BoreholeStatus.FirstOrDefault(bs => bs.Key == valuePatch.StatusKey);
             if (boreholeStatus == null)
                 return Conflict("Неверный статус");
 
             var oldStatus = _context.BoreholeStatusHistories
-                .FirstOrDefault(bsh => bsh.GameStep == team.GameStep & bsh.PurchasedBoreholeId == valuePatch.Id);
+                .FirstOrDefault(bsh => bsh.GameStep == team.GameStep & bsh.PurchasedBoreholeId == valuePatch.BoreholeId);
             if (oldStatus == null)
             {
                 var newStatus = new DbModels.BoreholeStatusHistory()
                 {
-                    BoreholeStatusId = boreholeStatus.Id,
+                    BoreholeStatus = boreholeStatus,
                     GameStep = team.GameStep,
-                    PurchasedBoreholeId = valuePatch.Id,
+                    PurchasedBoreholeId = valuePatch.BoreholeId,
                 };
                 _context.BoreholeStatusHistories.Add(newStatus);
             }
             else
             {
-                oldStatus.BoreholeStatusId = boreholeStatus.Id;
+                oldStatus.BoreholeStatus = boreholeStatus;
                 _context.BoreholeStatusHistories.Update(oldStatus);
             }
 

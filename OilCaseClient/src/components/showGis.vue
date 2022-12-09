@@ -1,65 +1,70 @@
 <template>
-  <div style="overflow-x:scroll;width:1200px;">
-    <q-toggle v-model="bModeOtbiv" label="установка уровней"/>
-    <div>
-      <v-stage ref="stage" :config="configKonva" @mousedown="handleStageMouseDown" @mousemove="handleMouseMove">
-        <v-layer>
-          <v-rect v-for="item in FaciesRects" :key="item.rnum" :config="item"/>
-        </v-layer>
-        <v-layer ref="layerCellLines1">
-          <v-rect
-            :config="{ x: 60, y: curMouseYPos, width: getGraphWidth, height: 1, fill: 'black', visible: bModeOtbiv === true && curMouseYPos > getTopPadding }"/>
-        </v-layer>
-        <v-layer ref="layerCellLines3">
-          <v-line v-for="item in arrYScale" :key="item.idx" :config="item"></v-line>
-          <v-text v-for="item in arrYText" :key="item.idx" :config="item"/>
-          <v-rect :config="{ x: 0, y: getTopPadding, width: getGraphWidth, height: 1, fill: 'black' }"/>
-        </v-layer>
-        <v-layer ref="layerAxisTopLabel">
-          <v-text v-for="item1 in ArffPoints4Graph" :config="item1.scaleTopTitle1" :key="item1.scaleTopTitle1.idx">
-          </v-text>
-          <v-text v-for="item2 in ArffPoints4Graph" :config="item2.scaleTopTitle2" :key="item2.scaleTopTitle2.idx">
-          </v-text>
-        </v-layer>
-        <v-layer>
-          <v-line v-for="item in ArffPoints4Graph"
-                  :config="{ x: item.xLeft, y: getTopPadding,
+  <div>
+    <div v-show="this.count === 0">
+      <b>Нет купленных исследований</b>
+    </div>
+    <div v-show="this.count > 0" style="overflow-x:scroll;width:1200px;">
+      <q-toggle v-model="bModeOtbiv" label="установка уровней"/>
+      <div>
+        <v-stage ref="stage" :config="configKonva" @mousedown="handleStageMouseDown" @mousemove="handleMouseMove">
+          <v-layer>
+            <v-rect v-for="item in FaciesRects" :key="item.rnum" :config="item"/>
+          </v-layer>
+          <v-layer ref="layerCellLines1">
+            <v-rect
+              :config="{ x: 60, y: curMouseYPos, width: getGraphWidth, height: 1, fill: 'black', visible: bModeOtbiv === true && curMouseYPos > getTopPadding }"/>
+          </v-layer>
+          <v-layer ref="layerCellLines3">
+            <v-line v-for="item in arrYScale" :key="item.idx" :config="item"></v-line>
+            <v-text v-for="item in arrYText" :key="item.idx" :config="item"/>
+            <v-rect :config="{ x: 0, y: getTopPadding, width: getGraphWidth, height: 1, fill: 'black' }"/>
+          </v-layer>
+          <v-layer ref="layerAxisTopLabel">
+            <v-text v-for="item1 in ArffPoints4Graph" :config="item1.scaleTopTitle1" :key="item1.scaleTopTitle1.idx">
+            </v-text>
+            <v-text v-for="item2 in ArffPoints4Graph" :config="item2.scaleTopTitle2" :key="item2.scaleTopTitle2.idx">
+            </v-text>
+          </v-layer>
+          <v-layer>
+            <v-line v-for="item in ArffPoints4Graph"
+                    :config="{ x: item.xLeft, y: getTopPadding,
                     points: item.graphLinePoints, tension: 0.7,
                     stroke: item.lineColor, strokeWidth: 1.8 }"
-                  :key="item.idx"></v-line>
-        </v-layer>
-        <v-layer ref="layerCellLines4">
-          <v-rect v-for="item in arrTappedLevelsList" :key="item.DisplayConfig.idx" :config="item.DisplayConfig"/>
-          <v-text v-for="item in arrTappedLevelsList" :key="item.DisplayLabel.idx" :config="item.DisplayLabel"
-                  @mousedown="handleLevelTextMouseDown"/>
-        </v-layer>
-      </v-stage>
-    </div>
+                    :key="item.idx"></v-line>
+          </v-layer>
+          <v-layer ref="layerCellLines4">
+            <v-rect v-for="item in arrTappedLevelsList" :key="item.DisplayConfig.idx" :config="item.DisplayConfig"/>
+            <v-text v-for="item in arrTappedLevelsList" :key="item.DisplayLabel.idx" :config="item.DisplayLabel"
+                    @mousedown="handleLevelTextMouseDown"/>
+          </v-layer>
+        </v-stage>
+      </div>
 
-    <q-dialog v-model="levelDialogModel" prevent-close>
-      <span slot="title">{{ sModalTitle }}</span>
-      <span slot="message">Название уровня для отметки <b>{{ tmpAddLvelItem.yLevelMetr }}</b>
+      <q-dialog v-model="levelDialogModel" prevent-close>
+        <span slot="title">{{ sModalTitle }}</span>
+        <span slot="message">Название уровня для отметки <b>{{ tmpAddLvelItem.yLevelMetr }}</b>
             <p class="q-pt-md q-mb-sm"><b>Значения</b></p>
             <span v-for="item1 in tmpAddLvelItem.xValArr" :key="`${item1.skey}`">
                {{ item1.skey }} - {{ item1.xVal }}<br/>
             </span>
          </span>
-      <div slot="body">
-        <q-field label="Название уровня" :label-width="4">
-          <q-input v-model="CurLevelName"/>
-        </q-field>
-      </div>
-      <template slot="buttons" slot-scope="props">
-        <q-btn v-show="sModalTitle === 'Параметры уровня'" color="negative" label="удалить"
-               @click="delLevel(props.ok)"/>
-        <q-btn flat label="отмена" @click="levelDialogModel = false"/>
-        <q-btn color="primary" label="сохранить" @click="choose(props.ok)"/>
-      </template>
-    </q-dialog>
-    <q-inner-loading :visible="loadProc">
-      <q-spinner-gears size="50px" color="primary"></q-spinner-gears>
-    </q-inner-loading>
+        <div slot="body">
+          <q-field label="Название уровня" :label-width="4">
+            <q-input v-model="CurLevelName"/>
+          </q-field>
+        </div>
+        <template slot="buttons" slot-scope="props">
+          <q-btn v-show="sModalTitle === 'Параметры уровня'" color="negative" label="удалить"
+                 @click="delLevel(props.ok)"/>
+          <q-btn flat label="отмена" @click="levelDialogModel = false"/>
+          <q-btn color="primary" label="сохранить" @click="choose(props.ok)"/>
+        </template>
+      </q-dialog>
+      <q-inner-loading :visible="loadProc">
+        <q-spinner-gears size="50px" color="primary"></q-spinner-gears>
+      </q-inner-loading>
 
+    </div>
   </div>
 </template>
 
@@ -139,6 +144,7 @@ export default {
     EventBus.$on('doOpenWellLevels', item => {
       if (this.boreholeName === item.name) {
         let gisData = new Map()
+
         console.log(item)
         item.boreholeLog.forEach(item => {
           gisData.set(item.name, {
@@ -146,6 +152,7 @@ export default {
             'positions': item.positions
           })
         })
+        this.count = gisData.size
         this.doOpenWellLevels(gisData);
       }
     });
@@ -264,7 +271,6 @@ export default {
       this.FaciesRects = [];
       let grPointYPrev = TopPadding;
       let Lff = tempData.get('facies') != null ? (height - TopPadding) / tempData.get('facies').values.length : null
-
 
 
       vm.ArffPoints4Graph.forEach(scVal => {

@@ -116,7 +116,7 @@ export default {
 
   PostMapObjectOfArrangement: async function (objectName, cellX, cellY, subCellX, subCellY) {
     console.log('[Log] PutMapObjectOfArrangement')
-    this.execute('post', `/Purchased/ObjectOfArrangement/`, {
+    return  this.execute('post', `/Purchased/ObjectOfArrangement/`, {
       "CellX": cellX,
       "CellY": cellY,
       "SubCellX": subCellX,
@@ -292,8 +292,8 @@ export default {
   PatchBoreholeProduction: async function (boreholeId, dtatusId) {
     console.log('[Log] PutBorehole')
     return this.execute('patch', `/Purchased/BoreholeProduction/`, {
-      "Id": boreholeId,
-      "StatusId": dtatusId
+      "BoreholeId": boreholeId,
+      "StatusKey": dtatusId
     })
       .then(resp => {
         console.log(resp)

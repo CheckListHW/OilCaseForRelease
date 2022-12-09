@@ -5,9 +5,9 @@
       <div style="flex-wrap: wrap;" class="wrap q-mt-lg">
         <h4 style="margin-top:-10px">
           Текущий ход: {{ iCurGameStep }}
-          <q-btn rounded class="q-mx-lg" size="lg" no-caps color="indigo-9" label="Завершить ход" v-show="isCaptain"
-                 :disable="Boolean(!bAllowNextStepDay & !bAllowNextStepDay)" @click="bNextStep = true">
-            <q-tooltip v-show="Boolean(!bAllowNextStepDay & !bAllowNextStepDay)">Временная блокировка действий
+          <q-btn rounded class="q-mx-lg" size="lg" no-caps color="indigo-9" label="Завершить ход " v-show="isCaptain"
+                 :disable="Boolean(!bAllowNextStepDay || !bAllowNextStepMoney)" @click="bNextStep = true">
+            <q-tooltip v-show="Boolean(!bAllowNextStepDay || !bAllowNextStepMoney)">Временная блокировка действий
             </q-tooltip>
           </q-btn>
           <span class="q-ml-lg text-deep-orange-6" style="font-size:12pt" v-show="!isCaptain">
@@ -154,7 +154,7 @@
                   {{ item.name }} ячейка i {{ item.iCell }} j {{ item.jCell }}
                   <span class="q-ml-md" v-if="item.addedDate !== undefined">{{ item.addedDate | dateDate }}</span>
                   <div v-if="item.modelWell === wellType.Production">
-                    Эксплуатационная {{ item.wellstatusText }}
+                    Эксплуатационная: {{ item.wellstatusText }}
                     <br/>Глубина перехода в горизонтальный ствол/пятка/heel в м {{ item.drilldeep }}
                     <br/>Точка окончания горизонтального ствола/носок/toe
                     I: {{ item.toeI }} J: {{ item.toeJ }} K: {{ item.toeK }}
@@ -169,7 +169,7 @@
                     Финансовые затраты
                     <q-chip square small color="primary">{{
                         item.onGameStep > 0
-                          ? getWellMoneyDrillAll(calcDrillDeep(getDrillPoints(), modelWell))
+                          ? getWellMoneyDrillAll(calcDrillDeep(getDrillPointsBorehole(item), modelWell))
                           : 0 | formatFinance
                       }}
                     </q-chip>
@@ -179,7 +179,7 @@
                       базовая:
                       <b>{{ mnyWellBase | formatFinance }}</b> + бурения:
                       <b>{{
-                          getWellMoneyDrill(calcDrillDeep(getDrillPoints(), modelWell)) | formatFinance
+                          getWellMoneyDrill(calcDrillDeep(getDrillPointsBorehole(item), modelWell)) | formatFinance
                         }}</b>
                       +
                     </span>
@@ -197,7 +197,7 @@
                     <span v-show="item.onGameStep > 0">
                       базовые: <b>{{ sutWellBase }}</b>
                       суток + дополнительные:
-                      <b>{{ getWellDayDrill(calcDrillDeep(getDrillPoints(), modelWell)) | formatSut }}</b>
+                      <b>{{ getWellDayDrill(calcDrillDeep(getDrillPointsBorehole(item), modelWell)) | formatSut }}</b>
                       + 1</span>
                     исследования: <b>{{ getCostDayResearch(item) | formatSut }}</b>
                   </p>
@@ -529,12 +529,13 @@ import moment from 'moment'
 import OilcaseApi from "src/api/OilCaseApi.js";
 import {UserData} from "../api/DataForm"
 import {MapObjectOfArrangement} from "../api/MapObjectOfArrangement";
-import {Properties, ObjectsOfArrangement, DictMaps} from "src/api/Properties";
+import {Properties, ObjectsOfArrangement, DictMaps, WellStatuses, WellStatusesDict} from "src/api/Properties";
 import {Dialogs, Notifications, SpinnerOptions, UserActions} from "../data/ObjectTemplates/Dialogs";
 import {ObjectCreator} from "../data/ObjectTemplates/ObjectCreator";
 import Vue from "vue";
 import oilcaseApi from "src/api/OilCaseApi.js";
 import points from "echarts/src/layout/points";
+import OilCaseApi from "src/api/OilCaseApi.js";
 
 const width = 800
 const height = 800
@@ -671,7 +672,7 @@ export default {
       arrDisableArea: [],
       dictSurfObjects: [],
       dictMapsTypes: DictMaps,
-      dictWellMethodTypes: [],
+      dictWellMethodTypes: WellStatuses,
       megaObj: {},
 
       textXY: '',
@@ -729,7 +730,6 @@ export default {
 
     await OilcaseApi.GetTypesOfResearch().then(resp => {
       this.typesOfResearches = new Map(resp.map(item => [item.name, item]))
-      console.log(this.typesOfResearches)
     })
 
     OilcaseApi.GetMapObjectOfArrangement().then(resp => {
@@ -763,12 +763,14 @@ export default {
 
         if (item.trajectoryPoints.length > 2) {
           toeI = item.trajectoryPoints[2].x
-          toeK = item.trajectoryPoints[2].y
-          toeJ = item.trajectoryPoints[2].z
+          toeJ = item.trajectoryPoints[2].y
+          toeK = item.trajectoryPoints[2].z
         }
 
-        let borehole = this.addBorehole(item.id, CellX, CellY, name,
-          modelWell, gameStep, drillDeep, toeI, toeJ, toeK)
+        let borehole = this.addBorehole(item.id, CellX, CellY,
+          name, modelWell, gameStep,
+          drillDeep,
+          toeI, toeJ, toeK)
         this.addResearch(item.logNames, borehole)
       })
     })
@@ -785,15 +787,14 @@ export default {
 
         if (item.trajectoryPoints.length > 2) {
           toeI = item.trajectoryPoints[2].x
-          toeK = item.trajectoryPoints[2].y
-          toeJ = item.trajectoryPoints[2].z
+          toeJ = item.trajectoryPoints[2].y
+          toeK = item.trajectoryPoints[2].z
         }
-        let status = item.statusId
-
+        let status = WellStatusesDict[item.boreholeStatusKey]
         this.addBorehole(item.id, CellX, CellY,
           name, modelWell, gameStep,
           drillDeep,
-          toeI, toeJ, toeK, item.statusId)
+          toeI, toeJ, toeK, status)
       })
     })
 
@@ -1044,6 +1045,19 @@ export default {
       ]
     },
 
+    getDrillPointsBorehole(item) {
+      let points = [
+        [item.iCell, item.jCell, 0],
+        [item.iCell, item.jCell, item.drilldeep],
+      ]
+      if (item.modelWell === Properties.BoreholeType.Production) {
+        points.push([item.toeI, item.toeJ, item.toeK])
+      }else{
+        points.push(points[points.length-1])
+      }
+      return points
+    },
+
     getSeismicTypeMoney(typeSeismic) {
       return Properties.SeismicCost[typeSeismic]
     },
@@ -1141,8 +1155,11 @@ export default {
     },
 
     calcDrillDeep(points, thisModelWell) {
-      return this.distanceBetweenTwoPoints(points[0], points[1])
-        + (thisModelWell === Properties.BoreholeType.Production ? 0 : this.distanceBetweenTwoPoints(points[1], points[2]))
+      let distance = this.distanceBetweenTwoPoints(points[0], points[1])
+      if (thisModelWell === Properties.BoreholeType.Production)
+        distance += this.distanceBetweenTwoPoints(points[1], points[2])
+      return distance
+
     },
 
     getDrillEndDate(sutWellBase, sutWellDeep) {
@@ -1294,7 +1311,6 @@ export default {
       this.selIssl1Interval.min = item.drilldeep
       this.selIssl1Interval.max = this.minDrillDeep
       this.drillDeep = item.drilldeep
-      console.log(item)
       this.pCurPoint.icell = item.iCell
       this.pCurPoint.jcell = item.jCell
 
@@ -1314,7 +1330,7 @@ export default {
             var remIndex = this.indexWhere(this.arrDrillsList, arritem => arritem.name === item.name)
             this.arrDrillsList.splice(remIndex, 1)
             this.addUserActionToLogAsync(UserActions.DeleteBorehole(item.name))
-            OilcaseApi.DeleteBorehole()
+            OilcaseApi.DeleteBoreholeProduction(item.idx)
           })
           .catch((e) => {
             console.log(e)
@@ -1416,7 +1432,6 @@ export default {
 
           OilcaseApi.PostMapObjectOfArrangement(data, this.pCurPoint.icell, this.pCurPoint.jcell,
             this.subCellX, this.subCellY).then(resp => {
-            console.log()
             this.drawSubCellMap(resp, data, this.pCurPoint.icell, this.pCurPoint.jcell,
               this.subCellX, this.subCellY, this.iCurGameStep)
 
@@ -1521,6 +1536,7 @@ export default {
       }
       this.$q.dialog(Dialogs.SaveChanges())
         .then(() => {
+          OilCaseApi.PatchBoreholeProduction(vm.drCurSelWell.idx, vm.drCurSelWell.wellstatus)
           if (vm.drCurSelWell.arrStatus === undefined) {
             vm.drCurSelWell.arrStatus = []
           }
@@ -1583,7 +1599,7 @@ export default {
                     this.pCurPoint.name, this.modelWell, this.iCurGameStep,
                     this.drillDeep, this.toeI, this.toeJ, this.toeK)
                   this.addUserActionToLogAsync(UserActions.AddBorehole(resp, CellX, CellY))
-                })
+                }).catch(err => console.log(err))
             }
 
             break;
@@ -1591,9 +1607,6 @@ export default {
             let borehole = this.arrDrillsList.filter(item => {
               return item.jCell === CellX & item.jCell === CellY
             })[0]
-            console.log(CellX, CellY)
-            console.log(this.arrDrillsList)
-            console.log(borehole)
             OilcaseApi.PatchBoreholeExploration(borehole.idx, Array.from(this.selectedResearches, x => x.name))
             this.addResearch(this.selectedResearches, this.drCurSelWell)
             this.addUserActionToLogAsync(UserActions.AddResearches(this.selectedResearches, CellX, CellY))
@@ -1607,7 +1620,11 @@ export default {
         })
     },
 
-    addBorehole(boreholeId, CellX, CellY, name, modelWell, gameStep, drillDeep, toeI, toeJ, toeK, boreholeStatus) {
+    addBorehole(boreholeId, CellX, CellY,
+                name, modelWell, gameStep,
+                drillDeep,
+                toeI, toeJ, toeK,
+                boreholeStatus) {
       let borehole = ObjectCreator.Borehole(
         boreholeId, this.getXForDraw(CellX), this.getYForDraw(CellY),
         CellX, CellY,

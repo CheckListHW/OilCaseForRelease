@@ -8,7 +8,7 @@ public class PurchasedBorehole
 
 public class PurchasedBoreholeProductionPost : PurchasedBorehole
 {
-    public int StatusId { get; set; }
+    public string? StatusKey { get; set; }
 }
 
 public class PurchasedBoreholeExplorationPost : PurchasedBorehole
@@ -23,8 +23,8 @@ public class PurchasedBoreholeExplorationPatch
 
 public class PurchasedBoreholeProductionPatch
 {
-    public int Id { get; set; }
-    public int StatusId { get; set; }
+    public int BoreholeId { get; set; }
+    public string StatusKey { get; set; }
 }
 
 public class PurchasedBoreholeGet : PurchasedBorehole
@@ -40,5 +40,5 @@ public class PurchasedBoreholeExplorationGet : PurchasedBoreholeGet
 
 public class PurchasedBoreholeProductionGet : PurchasedBoreholeGet
 {
-    public int BoreholeStatusId { get; set; }
+    public string BoreholeStatusKey { get; set; }
 }

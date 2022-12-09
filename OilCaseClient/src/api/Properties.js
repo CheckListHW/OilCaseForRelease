@@ -590,5 +590,67 @@ module.exports = {
       mode: 0,
       status: 0,
     },
-  ]
+  ],
+  WellStatuses: [
+    {
+      sKey: 'wt1',
+      sText: 'Добывающая',
+      mode: 0
+    },
+    {
+      sKey: 'wt2',
+      sText: 'Нагнетательная',
+      mode: 0
+    },
+    {
+      sKey: 'wt3',
+      sText: 'Консервация',
+      mode: 0
+    },
+    {
+      sKey: 'wt4',
+      sText: 'Вывести из консервации в добычу',
+      mode: 0
+    }, {
+      sKey: 'wt5',
+      sText: 'Вывести из консервации в нагнетание',
+      mode: 0
+    },
+    {
+      sKey: 'wt6',
+      sText: 'Финальная консервация',
+      mode: 0
+    }
+  ],
+  WellStatusesDict: {
+    'wt1': {
+      sKey: 'wt1',
+      sText: 'Добывающая',
+      mode: 0
+    },
+    'wt2': {
+      sKey: 'wt2',
+      sText: 'Нагнетательная',
+      mode: 0
+    },
+    'wt3': {
+      sKey: 'wt3',
+      sText: 'Консервация',
+      mode: 0
+    },
+    'wt4': {
+      sKey: 'wt4',
+      sText: 'Вывести из консервации в добычу',
+      mode: 0
+    }, 'wt5': {
+      sKey: 'wt5',
+      sText: 'Вывести из консервации в нагнетание',
+      mode: 0
+    },
+    'wt6': {
+      sKey: 'wt6',
+      sText: 'Финальная консервация',
+      mode: 0
+    }
+  }
 };

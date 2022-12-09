@@ -20,10 +20,10 @@ namespace OilCaseApi.Controllers.Api.LithologicalData
         {
             _context = context;
         }
-        
+
         protected DbModels.User? GetUser(string userName) => _context.Users
-                .Include(u => u.Team)
-                .FirstOrDefault(u => u.UserName == userName);
+            .Include(u => u.Team)
+            .FirstOrDefault(u => u.UserName == userName);
 
         /// <summary>
         /// Возвращает скважины и купленные для нее гисы 
@@ -50,6 +50,7 @@ namespace OilCaseApi.Controllers.Api.LithologicalData
             {
                 ApiModels.Borehole boreholeApiApi = new()
                 {
+                    Id = borehole.Id,
                     Name = borehole.Name,
                     X = borehole.PurchasedObjectOfArrangement.CellX,
                     Y = borehole.PurchasedObjectOfArrangement.CellY,
@@ -58,8 +59,8 @@ namespace OilCaseApi.Controllers.Api.LithologicalData
                 };
 
                 DbModels.Cell? cell = _context.Cells.FirstOrDefault(c =>
-                        c.X == boreholeApiApi.X & c.Y == boreholeApiApi.Y &
-                        c.LithologicalModelId == team.LithologicalModelId);
+                    c.X == boreholeApiApi.X & c.Y == boreholeApiApi.Y &
+                    c.LithologicalModelId == team.LithologicalModelId);
 
                 if (cell == null) continue;
 

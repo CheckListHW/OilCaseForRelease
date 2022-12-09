@@ -8,7 +8,12 @@ namespace OilCaseApi.resources;
 
 public struct RequiredBoreholeStatus
 {
-    public const string Work = "Work";
+    public const string wt1 = "wt1";
+    public const string wt2 = "wt2";
+    public const string wt3 = "wt3";
+    public const string wt4 = "wt4";
+    public const string wt5 = "wt5";
+    public const string wt6 = "wt6";
 }
 
 public struct RequiredColumnNames
@@ -59,7 +64,7 @@ public class DefaultValue
         foreach (var field in typeof(RequiredBoreholeStatus).GetFields())
             context.BoreholeStatus.Add(new BoreholeStatus()
             {
-                Name = field.Name,
+                Key = field.Name,
             });
 
 

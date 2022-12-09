@@ -193,7 +193,7 @@ export default {
     // }
 
     this.container = this.$refs.canvasContainer
-    this.prepareScene()
+    this.prepareScene(this.lithologicalMinZ, this.lithologicalMaxZ)
     this.raycaster = new THREE.Raycaster()
     this.pickedObject = null
   },
@@ -437,6 +437,7 @@ export default {
       } catch (error) {
         console.log(error)
       }
+      this.addScaleText(this.lithologicalMinZ, this.lithologicalMaxZ)
     },
 
     onMouseClick(event) {

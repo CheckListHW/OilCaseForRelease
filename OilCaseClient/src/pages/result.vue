@@ -1,8 +1,8 @@
 <template>
   <q-page padding class="row justify">
-    <q-inner-loading :visible="apiloadvisible">
-      <q-spinner-gears size="50px" color="primary"></q-spinner-gears>
-    </q-inner-loading>
+<!--    <q-inner-loading :visible="apiloadvisible">-->
+<!--      <q-spinner-gears size="50px" color="primary"></q-spinner-gears>-->
+<!--    </q-inner-loading>-->
     <div class="doc-container" style="margin-top:-20px !important;width:95%">
       <q-tabs animated inverted swipeable align="justify">
         <q-tab name="tabWell" slot="title" label="Скважины"/>
@@ -73,13 +73,13 @@
           <!--            </q-item>-->
           <!--          </q-list>-->
 
-          <q-list v-if="boreholes" highlight inset-separator v-for="(item) in boreholes" :key="`${item.x}-${item.y}`">
+          <q-list  v-if="boreholes" highlight inset-separator v-for="(item) in boreholes" :key="`${item.x}-${item.y}`">
             <q-item>
               <q-item-main>
                 <div>
                   <div class="col-8 ">
                     {{ item.name.toUpperCase() }} ячейка X:<b>{{ item.x }}</b> - Y:<b>{{ item.y }}</b> Глубина бурения
-                    {{ item.zMin }}
+                    {{ item.zMin }} {{item.id === visibleGisId}}
                     <q-btn class="q-ma-sm" color="primary" label="выгрузить каротажи" @click="getWellCarotags(item)"/>
                     кол-во уровней
                     <q-chip square v-bind:color="getTappedLevelCount(item) > 0 ? 'green-4' : 'red-4'">
@@ -94,17 +94,17 @@
                 <div>
                   <div class="col-8">
                     <p class="q-mt-lg" v-for="itemResearch in item.gis" :key="`${itemResearch.name}`">
-                      <b>{{ itemResearch.name.toUpperCase() }} - {{ itemResearch.description }} </b>
+                      <b>{{ itemResearch.name.toUpperCase() }} - {{ itemResearch.description }}  </b>
                       <q-btn v-show="itemResearch.name === 'facies'" class="q-ma-sm" color="positive"
                              label=" получить фото керна"/>
                     </p>
                   </div>
 
-                  <q-modal v-model="item.bEditModel" :content-css="{ minWidth: '50vw', minHeight: '99vh' }">
+                  <q-modal v-show="item.id === visibleGisId" v-model="item.bEditModel" :content-css="{ minWidth: '50vw', minHeight: '99vh' }">
                     <q-modal-layout>
                       <q-toolbar slot="header">
                         <q-toolbar-title>
-                          <div>Отбивка уровней для скважины {{ item.name }}</div>
+                          <div>Отбивка уровней для скважины {{ item.name }} {{item.bEditModel}}</div>
                         </q-toolbar-title>
                       </q-toolbar>
                       <div style="margin:20px">
@@ -118,7 +118,7 @@
                       <q-btn class="q-mr-lg q-mb-md float-right" color="teal" @click.prevent="doSaveWellParams(item)">
                         Сохранить
                       </q-btn>
-                      <q-btn class="q-ml-lg q-mb-md" color="orange" @click.prevent="item.bEditModel = false">Отмена
+                      <q-btn class="q-ml-lg q-mb-md" color="orange" @click.prevent="doCloseGis(item)">Отмена
                       </q-btn>
                     </q-modal-layout>
                   </q-modal>
@@ -235,6 +235,7 @@ export default {
       secLS: null,
       iModelMode: 1,
       bEditModel: false,
+      visibleGisId: 0,
       apiloadvisible: false,
       arrDrillsList: [],
       arr2DProfileList: [],
@@ -313,6 +314,9 @@ export default {
   },
 
   methods: {
+    isVisibleGis(item){
+      return item.bEditModel
+    },
     addBorehole(CellX, CellY, name, modelWell, gameStep, toeI, toeJ, toeK) {
       let boreholeId = this.getMaxIdx(this.arrDrillsList)
       this.arrDrillsList.push(ObjectCreator.Borehole(
@@ -885,6 +889,10 @@ export default {
     getTappedLevelCount(item) {
       return 0
     },
+    doCloseGis(item){
+      item.bEditModel = false;
+      this.visibleGisId = 0
+    },
 
     doSaveWellParams(thiItem) {
       thiItem.tappedLevels = store.state.curWellTappedLevels;
@@ -904,10 +912,14 @@ export default {
     },
 
     doOpenWellParams(item) {
+      console.log(this.visibleGisId)
+      console.log(item)
       this.apiloadvisible = true;
+      this.visibleGisId = item.id
       item.bEditModel = true;
       console.log(item)
       EventBus.$emit("doOpenWellLevels", item)
+      console.log(this.visibleGisId)
     },
 
     async get2DTimesImages(idx, stype) {

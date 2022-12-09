@@ -596,7 +596,7 @@ export const OutSideMixin = {
       ctx.fill();
       ctx.stroke();
     },
-    prepareScene() {
+    prepareScene(minZ, maxZ) {
       vm = this;
       // scene, camera, renderer
       this.curObj = this.obj;
@@ -645,6 +645,10 @@ export const OutSideMixin = {
 
       this.scene.add(gridHelper);
       this.scene.rotation.x = -Math.PI / 2;
+
+      this.addScaleText(minZ, maxZ)
+
+
       let pmremGenerator = new THREE.PMREMGenerator(renderer);
       pmremGenerator.compileEquirectangularShader();
 
@@ -670,6 +674,35 @@ export const OutSideMixin = {
       animate();
 
       this.bShowScene = true;
+    },
+
+    addScaleText(minZ, maxZ){
+      this.addText('0', 110, 0, 100);
+      this.addText(maxZ.toString(), 110, 0, 0);
+      this.addText(minZ.toString(), 110, 0, -100);
+    },
+
+    addText(text, x ,y ,z){
+      let scene = this.scene
+      var loader = new THREE.FontLoader();
+      loader.load('fonts/helvetiker_regular.typeface.json',function(font){
+        var geometry = new THREE.TextGeometry( text, {
+          font: font,
+          size: 10,
+          height: 0.5,
+          curveSegments: 12,
+          bevelEnabled: false,
+          bevelThickness: 0.1,
+          bevelSize: 0.1,
+          bevelSegments: 0.1,
+        } );
+        var txt_mat = new THREE.MeshPhongMaterial({color:0x0000fe});
+        var txt_mesh = new THREE.Mesh(geometry, txt_mat);
+        txt_mesh.position.x = x;
+        txt_mesh.position.y = y;
+        txt_mesh.position.z = z;
+        scene.add(txt_mesh);
+      } );
     },
     getColorHSL: function (i) {
       let hue = i * 1.2 / 360;

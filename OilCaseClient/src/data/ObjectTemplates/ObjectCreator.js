@@ -96,7 +96,6 @@ export class ObjectCreator {
                              endDate, objectOfArrangement) {
     let objectTipText = objectOfArrangement.sPref === 'kp' ? `K${cellX}-${cellY}`
       : (objectOfArrangement.part !== 2 ? `s${cellX}-${cellY}` : '')
-
     let newObjectOfArrangement = {
       idx: id,
       id: 'surf_' + id,
@@ -170,12 +169,15 @@ export class ObjectCreator {
       iCell: cellX,
       jCell: cellY,
       onGameStep: gameStep,
-      status: status,
+      wellstatus: status ? status.sKey : "",
+      wellstatusText: status ? status.sText : "",
       id: name,
       fill: '#f7450e',
       drilldeep: drillDepth,
       modelWell: modelWell,
-      toeI: toeI, toeJ, toeK,
+      toeI: toeI,
+      toeJ: toeJ,
+      toeK: toeK,
       selWellIssl: [],
       selWellIssl2: [],
       selWellIssl3: [],
@@ -184,14 +186,15 @@ export class ObjectCreator {
       opacity: 0.8,
       bEditModel: false,
       tappedLevels: [],
-      name: 'w' + id,
-      radius: 12,
+      name: `${cellX}:${cellY}${modelWell.substring(0,1)}`,
+      radius: 15,
       label: {
         id: 'drLblb' + id,
-        text: 'w' + id,
-        x: drawCellX - 7,
+        text: `${cellX}:${cellY}${modelWell.substring(0,1)}`,
+        x: drawCellX - 12,
         y: drawCellY - 5,
-        fill: '#fff'
+        fill: '#fff',
+        fontSize: 10
       }
     }
   }
