@@ -1,2 +1,5 @@
 .vs
 obj
+/dev/OilCaseX/.config/dotnet-tools.json
+/dev/OilCaseX/Properties/PublishProfiles/registry.hub.docker.com_kos4v.pubxml
+/dev/OilCaseX/Properties/PublishProfiles/registry.hub.docker.com_kos4v.pubxml.user

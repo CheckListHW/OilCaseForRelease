@@ -270,6 +270,7 @@ export default {
   },
 
   mounted() {
+    console.log('body')
     var appLink = window.location.origin + window.location.pathname;
     this.pointerPosition = this.pointerPosition = {
       left: "0px",
@@ -277,8 +278,8 @@ export default {
       usname: "",
     };
 
-    this.hub = new MouseHub(process.env.NODE_ENV === "development"
-      ? localStorage.getItem("baseUrl") : appLink)
+    // this.hub = new MouseHub(process.env.NODE_ENV === "development" ? localStorage.getItem("baseUrl") : appLink)
+    // this.hub = new MouseHub(localStorage.getItem("baseUrl"))
 
     document.addEventListener(
       "scroll",

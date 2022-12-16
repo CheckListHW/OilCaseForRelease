@@ -3,5 +3,6 @@
   <PropertyGroup>
     <Controller_SelectedScaffolderID>ApiControllerWithActionsScaffolder</Controller_SelectedScaffolderID>
     <Controller_SelectedScaffolderCategoryPath>root/Common/Api</Controller_SelectedScaffolderCategoryPath>
+    <NameOfLastUsedPublishProfile>C:\Users\kos4v\Desktop\OilCaseForRelease\OilCaseX\dev\OilCaseX\Properties\PublishProfiles\registry.hub.docker.com_kos4v.pubxml</NameOfLastUsedPublishProfile>
   </PropertyGroup>
 </Project>

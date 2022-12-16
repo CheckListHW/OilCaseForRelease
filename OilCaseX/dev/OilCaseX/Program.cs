@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics;
+using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using OilCaseApi.Models;
@@ -18,12 +19,12 @@ switch (builder.Environment.EnvironmentName)
 {
     case "Development":
         connectionStringName += "Development";
-        url = "https://localhost:16745";
+        url = "http://localhost:16745";
         break;
 
     case "Staging":
         connectionStringName += "Staging";
-        url = "http://*:8080";
+        url = "http://0.0.0.0:8080";
         break;
 
     default:
@@ -50,12 +51,22 @@ builder.Services.AddIdentity<User, IdentityRole>(opt =>
 builder.Services.AddMvc(options => options.EnableEndpointRouting = false);
 builder.Services.AddRazorPages();
 builder.Services.AddSignalR();
-
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(
-        builder => {
+        builder =>
+        {
             builder.WithOrigins("http://localhost:8080")
+                .AllowAnyHeader()
+                .WithMethods("GET", "POST", "PUT", "DELETE", "PATCH")
+                .AllowCredentials();
+
+            builder.WithOrigins("http://89.108.115.227:80")
+                .AllowAnyHeader()
+                .WithMethods("GET", "POST", "PUT", "DELETE", "PATCH")
+                .AllowCredentials();
+
+            builder.WithOrigins("http://89.108.115.227")
                 .AllowAnyHeader()
                 .WithMethods("GET", "POST", "PUT", "DELETE", "PATCH")
                 .AllowCredentials();
@@ -79,7 +90,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IJwtGenerator, JwtGenerator>();
 builder.Services.Configure<IISServerOptions>(options => { options.MaxRequestBodySize = int.MaxValue; });
 
-builder.Services.AddSwaggerGen(options => {
+builder.Services.AddSwaggerGen(options =>
+{
     options.SwaggerDoc("v1", new OpenApiInfo()
     {
         Version = "v1",
@@ -93,9 +105,9 @@ var app = builder.Build();
 
 var loggerFactory = app.Services.GetService<ILoggerFactory>();
 loggerFactory.AddFile(builder.Configuration["Logging:LogFilePath"].ToString()
-                      , outputTemplate: " [{Level:u3}] {SourceContext} {Message} ({EventId:x8}){NewLine}{Exception}");
+    , outputTemplate: " [{Level:u3}] {SourceContext} {Message} ({EventId:x8}){NewLine}{Exception}");
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseDefaultFiles();
 app.MapRazorPages();
@@ -123,4 +135,6 @@ app.MapControllerRoute(
 
 app.Run();
 
-public partial class Program { }
+public partial class Program
+{
+}

@@ -83,7 +83,7 @@ export default {
       });
       try {
         let result = await PortalApi.DoLogin(this.username, this.password);
-
+        await PortalApi.GetInfo()
         this.smessage = result;
         this.$q.loading.hide();
         this.$router.push(result === true ? '/legend' : '');

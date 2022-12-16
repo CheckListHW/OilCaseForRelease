@@ -11,9 +11,6 @@ Vue.use(Vuex)
 Vue.use(VueRouter);
 Vue.use(VueKonva);
 
-
-
-
 export default function () {
   const Router = new VueRouter({
     routes,

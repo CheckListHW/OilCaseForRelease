@@ -3,49 +3,49 @@ const routes = [
     path: '',
     component: () => import('layouts/FirstLayout.vue'),
     children: [
-      { path: '/', component: () => import('pages/Index.vue') }
+      {path: '/', component: () => import('pages/Index.vue')}
     ]
   },
   {
     path: '/LoginPage',
     component: () => import('layouts/FirstLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/LoginReg/LoginPage.vue') }
+      {path: '', component: () => import('pages/LoginReg/LoginPage.vue')}
     ]
   },
   {
     path: '/legend',
     component: () => import('layouts/BodyLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/legend.vue') }
+      {path: '', component: () => import('pages/legend.vue')}
     ]
   },
   {
     path: '/tasks',
     component: () => import('layouts/BodyLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/tasks.vue') }
+      {path: '', component: () => import('pages/tasks.vue')}
     ]
   },
   {
     path: '/result',
     component: () => import('layouts/BodyLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/result.vue') }
+      {path: '', component: () => import('pages/result.vue')}
     ]
   },
   {
     path: '/endStep',
     component: () => import('layouts/BodyLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/endStep.vue') }
+      {path: '', component: () => import('pages/endStep.vue')}
     ]
   },
   {
     path: '/ThreeDScene',
     component: () => import('layouts/BodyLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/ThreeDScene.vue') }
+      {path: '', component: () => import('pages/ThreeDScene.vue')}
     ]
   },
 
@@ -53,21 +53,21 @@ const routes = [
     path: '/showDictMode',
     component: () => import('layouts/BodyLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/trash/showDictMode.vue') }
+      {path: '', component: () => import('pages/trash/showDictMode.vue')}
     ]
   },
   {
     path: '/showDictUsers',
     component: () => import('layouts/BodyLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/trash/showDictUsers.vue') }
+      {path: '', component: () => import('pages/trash/showDictUsers.vue')}
     ],
   },
   {
     path: '/showUserLog',
     component: () => import('layouts/BodyLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/trash/showUserLog.vue') }
+      {path: '', component: () => import('pages/trash/showUserLog.vue')}
     ]
   },
 
@@ -75,14 +75,14 @@ const routes = [
     path: '/editUserPage/:emplid',
     component: () => import('layouts/FirstLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/trash/editUserPage.vue') }
+      {path: '', component: () => import('pages/trash/editUserPage.vue')}
     ]
   },
   {
     path: '/surfcheck',
     component: () => import('layouts/FirstLayout.vue'),
     children: [
-      { path: '', component: () => import('pages/trash/surfCheckPage.vue') }
+      {path: '', component: () => import('pages/trash/surfCheckPage.vue')}
     ]
   },
 ]

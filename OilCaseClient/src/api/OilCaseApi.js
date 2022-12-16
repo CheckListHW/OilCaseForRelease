@@ -6,10 +6,12 @@ import Vuex from 'vuex'
 import {UserData} from './DataForm'
 import {MapObjectOfArrangement} from "./MapObjectOfArrangement";
 import points from "echarts/src/layout/points";
+import {console} from "vuedraggable/src/util/helper";
 
 Vue.use(Vuex)
 Vue.use(VueCookie)
-localStorage.setItem("baseUrl", process.env.NODE_ENV === 'development' ? 'https://localhost:16745/' : './')
+localStorage.setItem("baseUrl", process.env.NODE_ENV === 'development' ? 'http://localhost:16745/' : 'http://89.108.115.227:16745/')
+// localStorage.setItem("baseUrl",'')
 const client = Axios.create({
   baseURL: localStorage.getItem("baseUrl") + 'api/v1',
   json: true
@@ -17,7 +19,7 @@ const client = Axios.create({
 
 Vue.prototype.$http = Axios;
 
-const accessToken = Vue.cookie.get('oilcase_cookie');
+let accessToken = Vue.cookie.get('oilcase_cookie');
 
 if (accessToken) {
   Vue.prototype.$http.defaults.headers.common['Authorization'] = accessToken
@@ -25,8 +27,10 @@ if (accessToken) {
 
 export default {
   async execute(method, resource, data) {
+    accessToken = Vue.cookie.get('oilcase_cookie');
+    let response;
     if (accessToken) {
-      return client({
+      response = client({
         method,
         url: resource,
         data,
@@ -35,20 +39,33 @@ export default {
         }
       }).then(req => {
         return req.data
-      }).catch(err => {
-        return (err)
+      }).catch(req => {
+        switch (req.response.status) {
+          case 401:
+            Vue.cookie.remove("oilcase_cookie")
+            localStorage.clear()
+            window.location.replace("/LoginPage");
+        }
+        return (req)
       });
     } else {
-      return client({
+      response = client({
         method,
         url: resource,
         data
       }).then(req => {
         return req.data
-      }).catch(err => {
-        return (err)
+      }).catch(req => {
+        switch (req.response.status) {
+          case 401:
+            // console.log('401')
+        }
+        return (req)
       });
     }
+    // console.log(response)
+
+    return response
   },
 
 
@@ -57,9 +74,8 @@ export default {
     return await this.execute('post', `/Login`, {
       username: username,
       password: password
-    }).then(resp => {
+    }).then(async resp => {
       if ((typeof resp) === "string") {
-        this.GetInfo()
         Vue.cookie.set('oilcase_cookie', resp, "7d")
         return true
       } else {
@@ -116,7 +132,7 @@ export default {
 
   PostMapObjectOfArrangement: async function (objectName, cellX, cellY, subCellX, subCellY) {
     console.log('[Log] PutMapObjectOfArrangement')
-    return  this.execute('post', `/Purchased/ObjectOfArrangement/`, {
+    return this.execute('post', `/Purchased/ObjectOfArrangement/`, {
       "CellX": cellX,
       "CellY": cellY,
       "SubCellX": subCellX,
@@ -133,7 +149,7 @@ export default {
 
   DeleteMapObjectOfArrangement: async function (boreholeId) {
     console.log('[Log] DeleteMapObjectOfArrangement')
-    return this.execute('delete', `/Purchased/ObjectOfArrangement/${boreholeId}`, )
+    return this.execute('delete', `/Purchased/ObjectOfArrangement/${boreholeId}`,)
       .then(resp => {
         return true;
       })
@@ -194,15 +210,6 @@ export default {
   },
 
 
-
-
-
-
-
-
-
-
-
   GetMaps: async function () {
     console.log('[Log] GetMaps')
     return this.execute('get', `/Purchased/Map/`)
@@ -237,21 +244,6 @@ export default {
         return false;
       });
   },
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   GetBoreholeProduction: async function () {
