@@ -10,6 +10,8 @@ using OilCaseApi.hub;
 using Microsoft.OpenApi.Models;
 using OilCaseApi.Controllers.Api.UserData.Authorization;
 using Serilog;
+using System.Net.Sockets;
+using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,7 +26,7 @@ switch (builder.Environment.EnvironmentName)
 
     case "Staging":
         connectionStringName += "Staging";
-        url = "http://0.0.0.0:8080";
+        url = "http://0.0.0.0:8081";
         break;
 
     default:
@@ -56,20 +58,25 @@ builder.Services.AddCors(options =>
     options.AddDefaultPolicy(
         builder =>
         {
-            builder.WithOrigins("http://localhost:8080")
+            builder.WithOrigins("http://graphtpu.ru:8081/")
                 .AllowAnyHeader()
                 .WithMethods("GET", "POST", "PUT", "DELETE", "PATCH")
                 .AllowCredentials();
 
-            builder.WithOrigins("http://89.108.115.227:80")
-                .AllowAnyHeader()
-                .WithMethods("GET", "POST", "PUT", "DELETE", "PATCH")
-                .AllowCredentials();
+            // builder.WithOrigins("http://89.108.115.227:80")
+            //     .AllowAnyHeader()
+            //     .WithMethods("GET", "POST", "PUT", "DELETE", "PATCH")
+            //     .AllowCredentials();
 
-            builder.WithOrigins("http://89.108.115.227")
-                .AllowAnyHeader()
-                .WithMethods("GET", "POST", "PUT", "DELETE", "PATCH")
-                .AllowCredentials();
+            // builder.WithOrigins("http://89.108.115.227")
+            //     .AllowAnyHeader()
+            //     .WithMethods("GET", "POST", "PUT", "DELETE", "PATCH")
+            //     .AllowCredentials();
+
+            // builder.WithOrigins("http://0.0.0.0:80")
+            //     .AllowAnyHeader()
+            //     .WithMethods("GET", "POST", "PUT", "DELETE", "PATCH")
+            //     .AllowCredentials();
         });
 });
 
@@ -138,3 +145,4 @@ app.Run();
 public partial class Program
 {
 }
+

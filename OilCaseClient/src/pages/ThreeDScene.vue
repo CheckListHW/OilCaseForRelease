@@ -64,6 +64,7 @@ import * as THREE from 'three'
 import {GLTFLoader} from 'three/examples/jsm/loaders/GLTFLoader.js'
 import {ObjectsOfArrangement} from "src/api/Properties";
 import {itemPoint} from "v-charts/lib/constants";
+import {secondWalk} from "echarts/lib/chart/tree/layoutHelper";
 
 let vm = {}
 
@@ -166,7 +167,8 @@ export default {
           objModel: {
             sModel: dictItem.sKey,
             sKey: dictItem.sKey,
-            color: dictItem.color
+            color: dictItem.color,
+            url: dictItem.sModel
           }
         })
       })
@@ -242,7 +244,8 @@ export default {
         try {
           console.log(el.objModel.sKey)
           if (!this.skipKeys.includes(el.objModel.sKey)) {
-            const strModel = el.objModel.sModel.substring(2) + '.gltf'
+            console.log()
+            const strModel = el.objModel.url ? el.objModel.url : el.objModel.sModel.substring(2) + '.gltf'
             // console.log(strModel, el.objModel.sPref, el.objModel)
 
             const loader = new GLTFLoader()

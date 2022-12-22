@@ -1,7 +1,6 @@
 module.exports = function (ctx) {
   return {
-    plugins: [
-    ],
+    plugins: [],
     css: [
       'app.styl'
     ],
@@ -14,6 +13,7 @@ module.exports = function (ctx) {
       // 'fontawesome'
     ],
     supportIE: false,
+
     build: {
       scopeHoisting: true,
       // vueRouterMode: 'history',
@@ -21,13 +21,13 @@ module.exports = function (ctx) {
       // gzip: true,
       // analyze: true,
       // extractCSS: false,
-      extendWebpack (cfg) {
-      /*  cfg.module.rules.push({
-          enforce: 'pre',
-          test: /\.(js|vue)$/,
-          loader: 'eslint-loader',
-          exclude: /node_modules/
-        })*/
+      extendWebpack(cfg) {
+        /*  cfg.module.rules.push({
+            enforce: 'pre',
+            test: /\.(js|vue)$/,
+            loader: 'eslint-loader',
+            exclude: /node_modules/
+          })*/
       }
     },
     devServer: {
@@ -49,7 +49,7 @@ module.exports = function (ctx) {
         'QInput',
         'QList',
         'QListHeader',
-      'QRadio',
+        'QRadio',
         'QItem',
         'QItemMain',
         'QItemSeparator',
@@ -66,26 +66,27 @@ module.exports = function (ctx) {
         'QModal',
         'QModalLayout',
         'QInnerLoading',
-        'QSpinner','QSpinnerGears',
-        'QDialog','QField','QToggle',
+        'QSpinner', 'QSpinnerGears',
+        'QDialog', 'QField', 'QToggle',
         'QTabs',
         'QTab',
         'QTabPane',
         'QRouteTab',
         'QTimeline',
-        'QTimelineEntry','QSelect','QCheckbox','QBtnDropdown',
-        'QTable','QPopupEdit','QSearch',
+        'QTimelineEntry', 'QSelect', 'QCheckbox', 'QBtnDropdown',
+        'QTable', 'QPopupEdit', 'QSearch',
         'QTh',
         'QTr',
-        'QTd','QPopover',
-        'QTableColumns','QContextMenu','QDatetime'
+        'QTd', 'QPopover',
+        'QTableColumns', 'QContextMenu', 'QDatetime'
       ],
       directives: [
-        'Ripple','CloseOverlay'
+        'Ripple', 'CloseOverlay'
       ],
-    plugins: [
-      'Dialog', 'Notify' , 'Loading'
-    ]},
+      plugins: [
+        'Dialog', 'Notify', 'Loading'
+      ]
+    },
     animations: [],
     ssr: {
       pwa: false
@@ -135,7 +136,7 @@ module.exports = function (ctx) {
     },
     electron: {
       // bundler: 'builder', // or 'packager'
-      extendWebpack (cfg) {
+      extendWebpack(cfg) {
         // do something with Electron process Webpack cfg
       },
       packager: {

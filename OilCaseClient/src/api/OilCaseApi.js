@@ -10,7 +10,7 @@ import {console} from "vuedraggable/src/util/helper";
 
 Vue.use(Vuex)
 Vue.use(VueCookie)
-localStorage.setItem("baseUrl", process.env.NODE_ENV === 'development' ? 'http://localhost:16745/' : 'http://89.108.115.227:16745/')
+localStorage.setItem("baseUrl", process.env.NODE_ENV === 'development' ? 'http://localhost:16745/' : 'http://graphtpu.ru:16745/')
 // localStorage.setItem("baseUrl",'')
 const client = Axios.create({
   baseURL: localStorage.getItem("baseUrl") + 'api/v1',
